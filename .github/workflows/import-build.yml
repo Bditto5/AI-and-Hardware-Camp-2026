@@ -19,7 +19,7 @@ jobs:
         run: |
           Expand-Archive -LiteralPath react-camp-source.zip -DestinationPath . -Force
           Remove-Item -LiteralPath react-camp-source.zip
-          Remove-Item -LiteralPath .github/workflows/import-build.yml
+          Remove-Item -LiteralPath .github/workflows/build.yml,.github/workflows/release.yml -ErrorAction SilentlyContinue
           Remove-Item -LiteralPath ai-helper.html,curriculum.html,setup.html -ErrorAction SilentlyContinue
 
       - name: Commit the desktop foundation
