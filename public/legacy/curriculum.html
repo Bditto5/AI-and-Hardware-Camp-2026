@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>⚡ REACT Camp — AI + Hardware</title>
+<style>
+:root{
+  --bg:#0f1117;--panel:#1a1d27;--card:#22263a;--border:#2e3350;
+  --accent:#6c63ff;--green:#2d9e5f;--pink:#c73b6e;--yellow:#c47f00;
+  --text:#e8eaf6;--muted:#8b93c8;--white:#fff;--light:#f4f5fa;
+  --dark-text:#1a1d27;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── TOP NAV ── */
+.top-nav{display:flex;align-items:center;gap:0;background:var(--panel);border-bottom:1px solid var(--border);padding:0 16px;height:52px;position:sticky;top:0;z-index:100}
+.brand{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:24px;white-space:nowrap}
+.nav-tab{padding:14px 16px;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--white);border-bottom-color:var(--accent)}
+.nav-spacer{flex:1}
+.student-name{font-size:.8rem;color:var(--muted);padding:6px 12px;background:var(--card);border-radius:8px;cursor:pointer;border:1px solid var(--border)}
+
+/* ── SECTIONS ── */
+.section{display:none;height:calc(100vh - 52px)}
+.section.active{display:flex}
+
+/* ── LESSONS ── */
+#sec-lessons{flex-direction:row}
+.day-sidebar{width:160px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);padding:12px 8px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.day-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;cursor:pointer;text-align:left;transition:all .2s;display:flex;flex-direction:column;gap:2px}
+.day-btn:hover{border-color:var(--accent);background:#252840}
+.day-btn.active{border-color:var(--accent);background:#252840}
+.day-num{font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase}
+.day-title-sm{font-size:.78rem;color:var(--text);font-weight:600}
+.mode-toggle{display:flex;gap:6px;padding:8px}
+.mode-btn{flex:1;padding:6px;font-size:.75rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;text-align:center;transition:all .2s}
+.mode-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.done-check{margin-top:auto;padding:8px}
+.done-btn{width:100%;padding:7px;font-size:.75rem;background:var(--green);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700}
+
+/* ── SLIDE AREA ── */
+.slide-area{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.slide-progress{display:flex;gap:5px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;flex-wrap:wrap}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;flex-shrink:0}
+.prog-dot.active{background:var(--accent)}
+.prog-dot.done{background:var(--green)}
+.slide-nav{display:flex;gap:8px;margin-left:auto}
+.snav-btn{padding:5px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:.82rem;transition:all .2s}
+.snav-btn:hover{background:var(--accent);border-color:var(--accent)}
+.slides-viewport{flex:1;overflow:hidden;position:relative}
+.day-slides{height:100%;overflow-y:auto;padding:16px}
+
+/* ── INDIVIDUAL SLIDES ── */
+.slide{background:var(--light);border-radius:14px;padding:28px 32px;margin-bottom:12px;color:var(--dark-text);min-height:220px}
+.slide h2{font-size:1.4rem;font-weight:700;margin-bottom:14px;color:var(--dark-text)}
+.slide-list{list-style:disc;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:.92rem;line-height:1.6}
+.slide-list li{color:var(--dark-text)}
+.slide-list .spacer{list-style:none;height:6px}
+.slide-hook{background:var(--panel);text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px}
+.hook-text{font-size:1.5rem;font-weight:700;color:var(--white);line-height:1.5;white-space:pre-line}
+.hook-note{font-size:.9rem;color:var(--muted);margin-top:16px;font-style:italic}
+.slide-section{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px}
+.slide-section .sec-icon{font-size:3rem;margin-bottom:12px}
+.slide-section h2{font-size:1.8rem;color:var(--white);margin-bottom:8px}
+.slide-section p{color:rgba(255,255,255,.8);font-style:italic}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.two-card{background:var(--panel);border-radius:10px;padding:14px 16px;font-size:.84rem;color:var(--muted);line-height:1.7}
+.two-card p{color:var(--text)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
+.mini-card{background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.mini-icon{font-size:1.8rem;margin-bottom:4px}
+.mini-label{font-size:.82rem;font-weight:700;color:var(--dark-text);margin-bottom:2px}
+.mini-body{font-size:.72rem;color:#555;line-height:1.5;white-space:pre-line}
+.slide-demo{background:#f5f3ff}
+.demo-badge{display:inline-block;background:var(--accent);color:white;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:10px}
+.demo-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:.88rem}
+.step-num{min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:1px}
+.demo-tip{background:#ede9fe;border-radius:8px;padding:8px 12px;font-size:.82rem;color:var(--accent);font-weight:600;margin-top:8px}
+.slide-ethics .ethics-body{background:#fde8f1;border-radius:10px;padding:14px;font-size:.88rem;line-height:1.7;margin-bottom:12px;color:var(--dark-text)}
+.slide-ethics .ethics-qs ul{padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:6px;color:var(--dark-text)}
+.slide-ethics .ethics-qs strong{color:var(--pink);display:block;margin-bottom:6px}
+
+/* ── PRESENTER MODE ── */
+body.presenter-mode .slide-area{position:fixed;inset:0;z-index:200;background:var(--bg)}
+body.presenter-mode .slide-progress{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--border);border-bottom:none;justify-content:center;padding:8px 16px}
+body.presenter-mode .day-sidebar{display:none}
+body.presenter-mode .slides-viewport{height:100vh}
+body.presenter-mode .day-slides{display:flex;flex-direction:column;justify-content:center;height:100%;padding:20px 40px 60px;overflow:hidden}
+body.presenter-mode .slide{min-height:0;flex:1;display:flex;flex-direction:column;justify-content:center;font-size:1.1em}
+body.presenter-mode .slide:not(.current-slide){display:none}
+body.presenter-mode .current-slide{display:flex}
+.presenter-exit{display:none;position:fixed;top:12px;right:16px;z-index:300;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text);cursor:pointer;font-size:.8rem}
+body.presenter-mode .presenter-exit{display:block}
+.presenter-arrows{display:none;position:fixed;bottom:48px;left:50%;transform:translateX(-50%);gap:12px;z-index:210}
+body.presenter-mode .presenter-arrows{display:flex}
+.arr-btn{padding:10px 24px;background:var(--accent);border:none;border-radius:10px;color:white;font-size:1.2rem;cursor:pointer;font-weight:700}
+
+/* ── ACTIVITIES ── */
+#sec-activities{flex-direction:column;overflow-y:auto;background:var(--bg)}
+.act-filters{display:flex;gap:8px;padding:16px;background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.act-filters span{font-size:.8rem;color:var(--muted);margin-right:4px}
+.filt-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;transition:all .2s}
+.filt-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.acts-grid{padding:16px;display:flex;flex-direction:column;gap:10px;max-width:800px;width:100%;margin:0 auto}
+.act-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.act-card:hover{border-color:var(--accent)}
+.act-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.act-icon{font-size:1.5rem;flex-shrink:0}
+.act-meta{flex:1}
+.act-title{font-size:.9rem;font-weight:700;color:var(--text)}
+.act-diff{font-size:.75rem;margin-top:2px}
+.act-toggle{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:4px}
+.act-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.act-desc{font-size:.84rem;color:var(--muted);margin:12px 0;line-height:1.6}
+.lock-bar{background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.3);border-radius:8px;padding:8px 12px;font-size:.8rem;color:#c47f00;margin-bottom:10px}
+.act-link{display:inline-block;font-size:.78rem;color:var(--accent);text-decoration:none;margin-bottom:10px;padding:4px 8px;background:rgba(108,99,255,.1);border-radius:6px}
+.act-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.step-n{min-width:20px;height:20px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;margin-top:2px}
+.act-step pre{font-family:inherit;font-size:.84rem;color:var(--text);white-space:pre-wrap;line-height:1.6}
+
+/* ── GAMES ── */
+#sec-games{flex-direction:column;overflow-y:auto}
+.games-nav{display:flex;gap:8px;padding:14px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.game-tab{padding:7px 16px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--muted);cursor:pointer;font-size:.83rem;transition:all .2s}
+.game-tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+.game-panel{display:none;padding:20px;max-width:700px;margin:0 auto;width:100%}
+.game-panel.active{display:block}
+.quiz-score{font-size:.85rem;color:var(--muted);margin-bottom:12px}
+.quiz-q{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:16px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.quiz-opt{padding:12px 16px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:.9rem;color:var(--text);transition:all .2s;text-align:left}
+.quiz-opt:hover{border-color:var(--accent)}
+.quiz-opt.correct{background:rgba(45,158,95,.2);border-color:var(--green)}
+.quiz-opt.wrong{background:rgba(199,59,110,.2);border-color:var(--pink)}
+.quiz-feedback{min-height:28px;font-size:.88rem;margin-bottom:10px;font-weight:600}
+.quiz-next{padding:8px 20px;background:var(--accent);border:none;border-radius:8px;color:white;cursor:pointer;font-size:.85rem;font-weight:600}
+.quiz-result{text-align:center;padding:32px;font-size:1.1rem}
+.quiz-result h3{font-size:1.5rem;margin-bottom:8px;color:var(--accent)}
+.quiz-restart{margin-top:16px;padding:10px 24px;background:var(--green);border:none;border-radius:10px;color:white;font-size:.9rem;cursor:pointer;font-weight:700}
+/* code fix game */
+.bug-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.bug-desc{font-size:.84rem;color:var(--muted);margin-bottom:10px}
+.bug-hint{font-size:.8rem;color:var(--yellow);margin-bottom:10px;display:none}
+.code-boxes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.code-box{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px}
+.code-box label{font-size:.72rem;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase}
+.code-box pre{font-family:'Consolas',monospace;font-size:.8rem;color:var(--text);white-space:pre-wrap}
+.bug-actions{display:flex;gap:8px}
+.bug-btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600}
+.btn-hint{background:rgba(196,127,0,.15);color:var(--yellow)}
+.btn-reveal{background:var(--green);color:white}
+.btn-next-bug{background:var(--accent);color:white}
+
+/* ── BUILD LAB ── */
+#sec-build{flex-direction:column}
+.build-bar{display:flex;gap:8px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);align-items:center;flex-wrap:wrap}
+.build-tab{padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;transition:all .2s}
+.build-tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+.build-run{padding:6px 16px;background:var(--green);border:none;border-radius:8px;color:white;cursor:pointer;font-size:.8rem;font-weight:700;margin-left:auto}
+.build-ai{padding:6px 14px;background:var(--accent);border:none;border-radius:8px;color:white;cursor:pointer;font-size:.8rem;font-weight:600}
+.build-main{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;gap:0}
+.editor-pane{display:flex;flex-direction:column;border-right:1px solid var(--border)}
+.code-editor{flex:1;width:100%;border:none;background:var(--panel);color:var(--text);font-family:'Consolas',monospace;font-size:.82rem;padding:12px;resize:none;outline:none;line-height:1.7;tab-size:2}
+.preview-pane{display:flex;flex-direction:column}
+.preview-pane label{font-size:.72rem;font-weight:700;color:var(--muted);padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--border);text-transform:uppercase}
+#preview-frame{flex:1;border:none;background:white}
+.ai-pane{display:none;flex-direction:column;height:100%;max-height:calc(100vh - 110px)}
+.ai-pane.show{display:flex}
+.ai-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ai-msg{padding:10px 12px;border-radius:10px;font-size:.84rem;line-height:1.6;max-width:90%}
+.ai-msg.user{background:var(--accent);color:white;align-self:flex-end}
+.ai-msg.ai{background:var(--card);color:var(--text);align-self:flex-start}
+.ai-input-row{display:flex;gap:8px;padding:10px}
+.ai-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.84rem;font-family:inherit}
+.ai-send{padding:8px 14px;background:var(--accent);border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600}
+.build-activities{padding:12px;border-top:1px solid var(--border);background:var(--panel)}
+.build-activities h4{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.build-act-chips{display:flex;gap:6px;flex-wrap:wrap}
+.build-chip{padding:5px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:.75rem;color:var(--text);cursor:pointer;transition:all .2s}
+.build-chip:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── SETTINGS ── */
+#sec-settings{flex-direction:column;overflow-y:auto;align-items:center;padding:32px 16px}
+.settings-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:480px;width:100%;margin-bottom:16px}
+.settings-card h3{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-row label{font-size:.85rem;color:var(--text)}
+.setting-row small{display:block;font-size:.74rem;color:var(--muted)}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:24px;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--green)}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
+.pin-input{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:.9rem;width:120px;text-align:center;letter-spacing:4px}
+.pin-save{padding:7px 16px;background:var(--accent);border:none;border-radius:8px;color:white;cursor:pointer;font-size:.82rem;font-weight:600;margin-left:8px}
+.pin-section{display:none;padding:12px;background:var(--card);border-radius:10px;margin-top:12px}
+.pin-section.show{display:block}
+.pin-prompt{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.student-input{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:.9rem;width:200px}
+
+@media(max-width:640px){
+  .code-boxes,.two-col,.build-main{grid-template-columns:1fr}
+  .day-sidebar{width:120px}
+  .build-main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="brand">⚡ REACT Camp</div>
+  <button class="nav-tab active" onclick="showSection('lessons')">📚 Lessons</button>
+  <button class="nav-tab" onclick="showSection('activities')">🛠️ Activities</button>
+  <button class="nav-tab" onclick="showSection('games')">🎮 Games</button>
+  <button class="nav-tab" onclick="showSection('build')">💻 Build Lab</button>
+  <button class="nav-tab" onclick="showSection('settings')">⚙️</button>
+  <div class="nav-spacer"></div>
+  <div class="student-name" id="student-label" onclick="promptName()">👤 Set name</div>
+</nav>
+
+<!-- EXIT PRESENTER -->
+<button class="presenter-exit" onclick="exitPresenter()">✕ Exit Presenter</button>
+<div class="presenter-arrows">
+  <button class="arr-btn" onclick="prevSlide()">◀</button>
+  <button class="arr-btn" onclick="nextSlide()">▶</button>
+</div>
+
+<!-- ══════════════ LESSONS ══════════════ -->
+<div class="section active" id="sec-lessons">
+  <div class="day-sidebar">
+    <button class="day-btn" id="dbtn-1" onclick="selectDay(1)"><span class="day-num">Day 1</span><span class="day-title-sm">Open It Up</span></button><button class="day-btn" id="dbtn-2" onclick="selectDay(2)"><span class="day-num">Day 2</span><span class="day-title-sm">The Brains</span></button><button class="day-btn" id="dbtn-3" onclick="selectDay(3)"><span class="day-num">Day 3</span><span class="day-title-sm">Upgrade Lab</span></button><button class="day-btn" id="dbtn-4" onclick="selectDay(4)"><span class="day-num">Day 4</span><span class="day-title-sm">Power On</span></button><button class="day-btn" id="dbtn-5" onclick="selectDay(5)"><span class="day-num">Day 5</span><span class="day-title-sm">Demo Day</span></button>
+    <div style="flex:1"></div>
+    <div class="mode-toggle">
+      <div class="mode-btn active" id="mode-read" onclick="setMode('read')">📖 Read</div>
+      <div class="mode-btn" id="mode-pres" onclick="setMode('presenter')">🖥️ Present</div>
+    </div>
+    <div class="done-check">
+      <button class="done-btn" onclick="markDayDone()">✓ Done</button>
+    </div>
+  </div>
+  <div class="slide-area" id="slide-area">
+    <div class="slide-progress" id="slide-progress"></div>
+    <div class="slides-viewport" id="slides-viewport">
+      <div class="day-slides" id="day-slides-1" style="display:none"><div class="slide slide-hook"><p class="hook-text">What do you think is inside a computer?</p><p class="hook-note">Draw it on paper — no wrong answers. 2 minutes.</p></div><div class="slide slide-two"><h2>Computers: A Short History</h2><div class="two-col"><ul class="slide-list"><li>1940s — ENIAC: first electronic computer. 30 tons, room-sized.</li><li>1970s — Home computers: Apple II, Commodore 64.</li><li>1990s — The internet changes everything.</li><li>2007 — iPhone: a supercomputer in your pocket.</li><li>2020s — AI runs on the same components we're about to open.</li></ul><div class="two-card"><p>Your laptop does 100 billion calculations/sec at 3 lbs.<br><br>In 1969, NASA had less computing power than your phone.</p></div></div></div><div class="slide slide-cards"><h2>What's in Every Computer?</h2><div class="cards-grid"><div class="mini-card"><div class="mini-icon">🧠</div><div class="mini-label">CPU</div><div class="mini-body">The brain — fast, one task at a time</div></div><div class="mini-card"><div class="mini-icon">🎮</div><div class="mini-label">GPU</div><div class="mini-body">Parallel muscle — AI's best friend</div></div><div class="mini-card"><div class="mini-icon">📋</div><div class="mini-label">RAM</div><div class="mini-body">Workspace — gone when power off</div></div><div class="mini-card"><div class="mini-icon">💾</div><div class="mini-label">Storage</div><div class="mini-body">Filing cabinet — stays when off</div></div><div class="mini-card"><div class="mini-icon">⚡</div><div class="mini-label">PSU</div><div class="mini-body">Converts wall power to PC power</div></div><div class="mini-card"><div class="mini-icon">🏗️</div><div class="mini-label">Motherboard</div><div class="mini-body">Highway connecting everything</div></div></div></div><div class="slide slide-content"><h2>⚠️ Before You Touch Anything</h2><ul class="slide-list"><li>Touch the metal case frame first — discharges static</li><li>Watch for sharp metal edges on case panels</li><li>Machines are UNPLUGGED — confirm together before opening</li><li>Never force anything. Stop and ask.</li><li>These are decommissioned — you literally cannot break them</li></ul></div><div class="slide slide-section" style="background:#2d9e5f"><span class="sec-icon">🤖</span><h2>What Is AI?</h2><p>History, concepts, and your first chat</p></div><div class="slide slide-two"><h2>AI: A Brief History</h2><div class="two-col"><ul class="slide-list"><li>1950 — Alan Turing: 'Can machines think?'</li><li>1956 — Term 'Artificial Intelligence' coined</li><li>1997 — IBM Deep Blue beats chess world champion</li><li>2012 — Deep Learning revolution begins</li><li>2022 — ChatGPT launches, changes everything</li><li>Today — AI is in your phone, car, and apps</li></ul><div class="two-card"><p>The pattern:<br><br>Every few years AI gets dramatically better — not because the ideas changed, but because we got more data and more compute.<br><br>The components in that machine? Same hardware type that runs modern AI.</p></div></div></div><div class="slide slide-two"><h2>What AI Is (and Isn't)</h2><div class="two-col"><ul class="slide-list"><li>❌  NOT a robot with feelings</li><li>❌  NOT magic or sentient</li><li>❌  NOT thinking like a human</li><li class="spacer"></li><li>✅  Pattern matching on massive data</li><li>✅  Predicting the most likely next word</li><li>✅  Math — a LOT of math — done very fast</li></ul><div class="two-card"><p>Real example:<br><br>Your phone's autocomplete is baby AI. You type 'Happy birth...' and it predicts 'day' — it saw that pattern millions of times.<br><br>ChatGPT / our AI Helper does the same thing, just with billions of words and way more compute.</p></div></div></div><div class="slide slide-cards"><h2>AI You Already Use Every Day</h2><div class="cards-grid"><div class="mini-card"><div class="mini-icon">📱</div><div class="mini-label">Autocomplete</div><div class="mini-body">Phone keyboard predictions</div></div><div class="mini-card"><div class="mini-icon">😀</div><div class="mini-label">Face ID</div><div class="mini-body">Facial recognition = trained AI</div></div><div class="mini-card"><div class="mini-icon">📺</div><div class="mini-label">Recommendations</div><div class="mini-body">YouTube, TikTok, Netflix</div></div><div class="mini-card"><div class="mini-icon">📧</div><div class="mini-label">Spam Filter</div><div class="mini-body">AI classifies your email</div></div><div class="mini-card"><div class="mini-icon">🗣️</div><div class="mini-label">Voice Assistants</div><div class="mini-body">Siri, Alexa, Google</div></div><div class="mini-card"><div class="mini-icon">🎮</div><div class="mini-label">Game AI</div><div class="mini-body">Enemies that adapt to you</div></div></div></div><div class="slide slide-demo"><div class="demo-badge">💻 DEMO</div><h2>Tour the AI Helper App</h2><div class="demo-step"><span class="step-num">1</span><span>Open ai-helper.html in your browser</span></div><div class="demo-step"><span class="step-num">2</span><span>Set skill level — try 🌱 New to this</span></div><div class="demo-step"><span class="step-num">3</span><span>Try a quick prompt: 'What is AI?'</span></div><div class="demo-step"><span class="step-num">4</span><span>Ask: 'What does a CPU do? Explain simply.'</span></div><div class="demo-step"><span class="step-num">5</span><span>Ask: 'Which computer part matters most for AI?'</span></div><div class="demo-tip">💡 The AI is running locally on this laptop — no internet needed!</div></div></div>
+<div class="day-slides" id="day-slides-2" style="display:none"><div class="slide slide-hook"><p class="hook-text">Quick Fire: Name That Component
+5 parts — 30 seconds each</p><p class="hook-note">Teams compete. Fastest accurate answer wins the point.</p></div><div class="slide slide-two"><h2>CPU: The Brain</h2><div class="two-col"><ul class="slide-list"><li>Central Processing Unit</li><li>4–16 powerful cores (modern desktop)</li><li>Does one complex task at a time — extremely fast</li><li>Good at: decisions, branching logic, running programs</li><li>Clock speed: 3–5 GHz (billions of cycles/sec)</li><li class="spacer"></li><li>The expert who can solve any problem but works solo.</li></ul><div class="two-card"><p>Why CPU isn't enough for AI:<br><br>Training a neural network means multiplying millions of numbers, millions of times.<br><br>A CPU does this one at a time. Even at 5 GHz — too slow.<br><br>There's a better tool for this →</p></div></div></div><div class="slide slide-two"><h2>GPU: The Muscle</h2><div class="two-col"><ul class="slide-list"><li>Graphics Processing Unit</li><li>1,000–16,000+ smaller cores</li><li>Thousands of simple math operations simultaneously</li><li>Originally for rendering pixels (same math: matrix multiply)</li><li>AI training = matrix multiplication at massive scale</li><li class="spacer"></li><li>The 3,000 interns who can only do addition — but all at once.</li></ul><div class="two-card"><p>The NVIDIA H100 (used for ChatGPT):<br><br>• 16,896 CUDA cores<br>• 80 GB VRAM<br>• $30,000+ per card<br><br>Meta used 24,000 of them to train Llama 3.<br><br>The GPU in your old machine? Maybe 512 cores. Same idea, different scale.</p></div></div></div><div class="slide slide-content"><h2>The Key Difference</h2><ul class="slide-list"><li>CPU: One expert accountant who can solve any problem — works on one thing at a time.</li><li>GPU: 3,000 interns who can only do basic addition — but they ALL work at the same time.</li><li>AI math = a LOT of addition happening in parallel.</li><li>So for AI: you want the 3,000 interns.</li><li>→  That's why GPU VRAM is the #1 spec for an AI machine.</li></ul></div><div class="slide slide-section" style="background:#6c63ff"><span class="sec-icon">🎓</span><h2>How AI Learns</h2><p>Training, inference, and the Code Helper</p></div><div class="slide slide-two"><h2>Training vs Inference</h2><div class="two-col"><ul class="slide-list"><li>🏋️  TRAINING:</li><li>Show the model billions of examples</li><li>Adjust millions of 'weights' until predictions improve</li><li>Takes weeks, costs millions, needs hundreds of GPUs</li><li>Only happens once (per model version)</li><li class="spacer"></li><li>⚡  INFERENCE:</li><li>Use the trained model to answer questions</li><li>What we're doing right now on our laptops</li><li>Much cheaper and faster than training</li></ul><div class="two-card"><p>Analogy:<br>Training = going to school for years<br>Inference = answering a question on the test<br><br>The model file on your laptop:<br>Llama 3.2:3b = 3 billion parameters<br>File size: ~2 GB<br>All those 'weights' frozen into a file<br><br>GPT-4 estimated: 1 trillion+ parameters</p></div></div></div><div class="slide slide-cards"><h2>The Scale of AI Training</h2><div class="cards-grid"><div class="mini-card"><div class="mini-icon">⚡</div><div class="mini-label">GPT-3 Training</div><div class="mini-body">285K CPU cores<br>10,000 GPUs<br>Estimated cost: $4–12M</div></div><div class="mini-card"><div class="mini-icon">⏱️</div><div class="mini-label">Training Time</div><div class="mini-body">Ran for weeks continuously on Microsoft servers</div></div><div class="mini-card"><div class="mini-icon">💾</div><div class="mini-label">Training Data</div><div class="mini-body">45 terabytes of text from the internet</div></div><div class="mini-card"><div class="mini-icon">🖥️</div><div class="mini-label">Our Laptop</div><div class="mini-body">Inference only<br>Model already trained<br>Cost: $0</div></div></div></div><div class="slide slide-content"><h2>How Much Does AI Need?</h2><ul class="slide-list"><li>RAM — Model must FIT in RAM to run</li><li>  3B model: ~3–4 GB minimum</li><li>  7B model: ~8 GB minimum</li><li>  70B model: ~40 GB — most laptops can't do this</li><li class="spacer"></li><li>VRAM — GPU-accelerated inference needs model in VRAM</li><li>  Our old GPU: 1–4 GB — too small for modern models</li><li class="spacer"></li><li>Storage — Larger SSD = faster model loading</li><li>  4 GB model: HDD ~30s | SSD ~8s | NVMe ~1s</li></ul></div><div class="slide slide-demo"><div class="demo-badge">💻 DEMO</div><h2>Code Helper — Fix Buggy Code</h2><div class="demo-step"><span class="step-num">1</span><span>Open AI Helper → Code Helper tab</span></div><div class="demo-step"><span class="step-num">2</span><span>Paste this code:
+  def greet(name)
+    print('Hello ' + name)
+  greet('REACT Camp'
+  greet(42)</span></div><div class="demo-step"><span class="step-num">3</span><span>Click 'Explain It' — read what the AI says</span></div><div class="demo-step"><span class="step-num">4</span><span>Click 'Fix Bugs' — compare to the original</span></div><div class="demo-step"><span class="step-num">5</span><span>Ask: 'What does def mean?' or 'Why can't you add a string and number?'</span></div><div class="demo-tip">💡 Copy the code exactly as shown — the bugs are intentional!</div></div></div>
+<div class="day-slides" id="day-slides-3" style="display:none"><div class="slide slide-hook"><p class="hook-text">RAM vs Storage — What's the Difference?
+
+Thumb up = same thing
+Thumb down = totally different</p><p class="hook-note">Let's get the AI to settle the debate.</p></div><div class="slide slide-two"><h2>RAM: Your Computer's Workspace</h2><div class="two-col"><ul class="slide-list"><li>Volatile — disappears when power is off</li><li>Everything currently 'open' lives here</li><li>Bigger desk = more things open at once</li><li class="spacer"></li><li>For AI: the model has to fit in RAM to run</li><li>  3B model: needs ~4 GB</li><li>  7B model: needs ~8 GB</li><li>  70B model: needs ~40 GB</li><li class="spacer"></li><li>Adding RAM is the easiest upgrade for running AI locally.</li></ul><div class="two-card"><p>DDR Types (physically incompatible):<br><br>DDR3 — these old machines<br>DDR4 — most 2017–2023 machines<br>DDR5 — current high-end<br><br>Different notch positions — can't mix them up.<br><br>Dual Channel: put matching sticks in slots 1+3 (or 2+4). Doubles memory bandwidth.</p></div></div></div><div class="slide slide-cards"><h2>Storage: Speed Changes Everything</h2><div class="cards-grid"><div class="mini-card"><div class="mini-icon">💿</div><div class="mini-label">HDD</div><div class="mini-body">Spinning disk<br>~150 MB/s<br>Load 4GB model: ~30s</div></div><div class="mini-card"><div class="mini-icon">⚡</div><div class="mini-label">SSD (SATA)</div><div class="mini-body">Flash chips<br>~550 MB/s<br>Load 4GB model: ~8s</div></div><div class="mini-card"><div class="mini-icon">🚀</div><div class="mini-label">NVMe (M.2)</div><div class="mini-body">On motherboard<br>3,500–7,000 MB/s<br>Load 4GB model: ~1s</div></div><div class="mini-card"><div class="mini-icon">📱</div><div class="mini-label">Phone Storage</div><div class="mini-body">Similar to NVMe<br>Why phones boot in seconds</div></div></div></div><div class="slide slide-section" style="background:#2d9e5f"><span class="sec-icon">🎯</span><h2>Prompt Engineering</h2><p>Talk to AI like a pro</p></div><div class="slide slide-hook"><p class="hook-text">"Garbage in, garbage out."
+
+The quality of your AI answer depends entirely on the quality of your question.</p></div><div class="slide slide-two"><h2>Anatomy of a Good Prompt</h2><div class="two-col"><ul class="slide-list"><li>1. ROLE — who should the AI be?</li><li>   'Act as a patient coding tutor...'</li><li class="spacer"></li><li>2. CONTEXT — what do you have?</li><li>   'I have a quiz game with a questions array...'</li><li class="spacer"></li><li>3. TASK — what do you need?</li><li>   'Write the function that shows each question...'</li><li class="spacer"></li><li>4. FORMAT — how do you want the answer?</li><li>   'Explain each line in a comment.'</li><li class="spacer"></li><li>5. CONSTRAINTS — any limits?</li><li>   'Keep it simple — I'm just learning.'</li></ul><div class="two-card"><p>You don't need all 5 every time.<br><br>But the more you include, the better the answer.<br><br>The simplest rule:<br>Be specific about what you have, what you need, and who you are.<br><br>Most students go from bad to great prompts just by adding their skill level to every question.</p></div></div></div><div class="slide slide-content"><h2>Prompt Techniques That Work</h2><ul class="slide-list"><li>'Explain this like I'm [level]' — calibrates depth</li><li>'Here's what I have so far: [code]. Now add [feature].' — gives context</li><li>'That's close but I need X instead of Y' — iterate, don't restart</li><li>'What does line 5 do?' — ask about specific parts</li><li>'Can you write a simpler version first?' — scaffolded help</li><li>'What would go wrong if I did X?' — prediction and reasoning</li></ul></div><div class="slide slide-demo"><div class="demo-badge">💻 DEMO</div><h2>Same Question — 3 Ways</h2><div class="demo-step"><span class="step-num">1</span><span>❌ Basic: 'How do I make a quiz game?'</span></div><div class="demo-step"><span class="step-num">2</span><span>→ Better: 'How do I make a quiz game in HTML/JS? I'm a beginner. 5 questions, show score at end.'</span></div><div class="demo-step"><span class="step-num">3</span><span>✅ Best: 'I have a quiz game in HTML/JS with a questions array. Write the function that shows each question and records answers. Simple code, explain each line with a comment.'</span></div><div class="demo-step"><span class="step-num">4</span><span>Send all 3 — compare the quality of the responses</span></div><div class="demo-tip">💡 The difference in quality is dramatic. Show all 3 live.</div></div></div>
+<div class="day-slides" id="day-slides-4" style="display:none"><div class="slide slide-hook"><p class="hook-text">Can you list every reassembly step from memory?
+
+Group challenge — 60 seconds, go!</p><p class="hook-note">We'll check your list against the real order in a moment.</p></div><div class="slide slide-content"><h2>Reassembly Order — Why It Matters</h2><ul class="slide-list"><li>Step 1: CPU → Step 2: Thermal paste + cooler → Step 3: RAM</li><li>Step 4: Storage (SATA/M.2) → Step 5: GPU</li><li>Step 6: Front panel connectors (hardest part!)</li><li>Step 7: PSU main power (24-pin) + CPU power (4 or 8-pin)</li><li>Step 8: Case fans → Step 9: Cable management → Step 10: Close case</li><li class="spacer"></li><li>Most common mistakes:</li><li>  — RAM not fully seated (must hear/feel both clicks)</li><li>  — Front panel power connector on wrong pins</li><li>  — PSU switch on back still OFF</li><li>  — GPU power cable not fully plugged in</li></ul></div><div class="slide slide-two"><h2>The Trickiest Part: Front Panel</h2><div class="two-col"><ul class="slide-list"><li>PWR SW — power switch</li><li>RESET SW — reset button</li><li>HDD LED — drive activity light</li><li>POWER LED+ / LED— — power indicator</li><li class="spacer"></li><li>The manual is your best friend here.</li><li>Labels are tiny, on the board edge.</li><li class="spacer"></li><li>If it doesn't power on, 90% of the time:</li><li>  A — wrong front panel connector</li><li>  B — power cable not fully seated</li></ul><div class="two-card"><p>How to read the manual:<br><br>Look for 'JFP1' or 'F_PANEL'.<br>It shows a tiny pin diagram.<br><br>Pro tip:<br>Plug in power switch first. If the machine POSTs, worry about the rest after.<br><br>IF IT POSTS → YOU WIN. 🏆</p></div></div></div><div class="slide slide-section" style="background:#c73b6e"><span class="sec-icon">🎨</span><h2>AI Creates</h2><p>Image generation + project build time</p></div><div class="slide slide-two"><h2>How AI Makes Images</h2><div class="two-col"><ul class="slide-list"><li>Stable Diffusion uses 'diffusion' — starts with random noise</li><li>Runs many steps to gradually remove noise, guided by your prompt</li><li>More steps (20–50) = higher quality, slower</li><li>CFG Scale: how literally to follow the prompt (7–12 typical)</li><li class="spacer"></li><li>It's all running on the GPU — same hardware we studied!</li><li>No internet: completely local. Nothing sent anywhere.</li></ul><div class="two-card"><p>Example prompts:<br><br>'a friendly robot at a desk coding, digital art, vibrant colors'<br><br>'futuristic motherboard, glowing circuits, neon blue and purple, ultra detailed'<br><br>'cute pixel art character for a quiz game, white background, game sprite style'</p></div></div></div><div class="slide slide-content"><h2>Image Prompt Structure</h2><ul class="slide-list"><li>✅ Subject: 'a friendly robot coding'</li><li>✅ Style: 'digital art, pixel art, photorealistic, watercolor'</li><li>✅ Mood: 'vibrant, dark, dramatic lighting, soft and warm'</li><li>✅ Quality: 'ultra detailed, high quality, sharp focus, 4K'</li><li>✅ Negative: 'blurry, bad quality, distorted, ugly, low resolution'</li></ul></div><div class="slide slide-demo"><div class="demo-badge">💻 DEMO</div><h2>Generate Live — Watch How It Works</h2><div class="demo-step"><span class="step-num">1</span><span>Open AI Helper → Image tab (or project on screen)</span></div><div class="demo-step"><span class="step-num">2</span><span>Type: 'a friendly robot sitting at a desk coding, digital art style, vibrant neon colors, dark background'</span></div><div class="demo-step"><span class="step-num">3</span><span>Watch the generation steps — each pass brings it into focus</span></div><div class="demo-step"><span class="step-num">4</span><span>Try a second prompt with a totally different style</span></div><div class="demo-step"><span class="step-num">5</span><span>Show the negative prompt field — add/remove terms</span></div><div class="demo-tip">💡 While it generates: this is exactly the GPU compute we talked about on Day 2.</div></div></div>
+<div class="day-slides" id="day-slides-5" style="display:none"><div class="slide slide-section" style="background:#6c63ff"><span class="sec-icon">⚖️</span><h2>AI Ethics</h2><p>Real questions, no right answers</p></div><div class="slide slide-ethics"><h2>🤖 Scenario 1: The Hiring Algorithm</h2><div class="ethics-body"><p>A company trains AI on 10 years of hiring history. The data shows most successful hires came from 3 universities and were mostly male. The AI learns this — and starts filtering out everyone else, even qualified candidates.</p></div><div class="ethics-qs"><strong>💬 Discuss:</strong><ul><li>Who is responsible — the AI, the company, the engineers, or all of them?</li><li>Can you 'fix' the AI without fixing the underlying data?</li><li>Should companies be required to audit their AI before using it for hiring?</li></ul></div></div><div class="slide slide-ethics"><h2>📱 Scenario 2: What Does Your Phone Know?</h2><div class="ethics-body"><p>Your phone has: location history, microphone access, camera, all messages, search history, who you call and how long, sleep patterns, every app you open and when. All of this trains personalization AI.</p></div><div class="ethics-qs"><strong>💬 Discuss:</strong><ul><li>Did you actually agree to this? (Did you read the Terms of Service?)</li><li>Is 'free in exchange for data' a fair deal?</li><li>What would you want to change if you could?</li></ul></div></div><div class="slide slide-ethics"><h2>🎨 Scenario 3: AI Art — Who Owns It?</h2><div class="ethics-body"><p>Stable Diffusion (which we used yesterday) was trained on billions of images scraped from the internet — including copyrighted artwork. Artists now see AI generate images 'in their style' without credit or payment. You made images with it.</p></div><div class="ethics-qs"><strong>💬 Discuss:</strong><ul><li>Is training on copyrighted art fair use or theft?</li><li>Do you own the images you generated? Does the artist whose style it mimics?</li><li>What should the law say?</li></ul></div></div><div class="slide slide-ethics"><h2>💼 Scenario 4: Jobs — AI Replaces and Creates</h2><div class="ethics-body"><p>AI is already doing parts of jobs in writing, customer service, coding, data entry, and medical diagnosis. New jobs appeared: AI trainers, prompt engineers, AI safety researchers, model evaluators.</p></div><div class="ethics-qs"><strong>💬 Discuss:</strong><ul><li>Which jobs do you think are safe from AI in 10 years? Why?</li><li>What skills do you think will still matter?</li><li>Is this different from when factories replaced manual labor?</li></ul></div></div><div class="slide slide-content"><h2>Demo Format</h2><ul class="slide-list"><li>1. What does it do? — Live demo if possible</li><li>2. How did you build it? Which tools? How much did AI help?</li><li>3. One thing you're proud of</li><li>4. One thing you'd add with more time</li><li class="spacer"></li><li>Audience: 'One thing I liked: ___ / One question I have: ___'</li><li class="spacer"></li><li>💡 Everything counts. Even the starter with new colors — you built something, understand it, can explain it. That's it.</li></ul></div><div class="slide slide-cards"><h2>What's Next — Pick Your Path</h2><div class="cards-grid"><div class="mini-card"><div class="mini-icon">💻</div><div class="mini-label">Loved Coding?</div><div class="mini-body">CS50 (free, Harvard)<br>FreeCodeCamp<br>The Odin Project</div></div><div class="mini-card"><div class="mini-icon">🔧</div><div class="mini-label">Loved Hardware?</div><div class="mini-body">CompTIA A+ cert<br>Linus Tech Tips<br>r/buildapc</div></div><div class="mini-card"><div class="mini-icon">🤖</div><div class="mini-label">Loved AI?</div><div class="mini-body">Fast.ai (free)<br>Hugging Face<br>Andrew Ng / Coursera</div></div><div class="mini-card"><div class="mini-icon">⭐</div><div class="mini-label">All Three?</div><div class="mini-body">GitHub: post your project<br>Local hackathons<br>Robotics clubs</div></div></div></div><div class="slide slide-hook"><p class="hook-text">In 5 days you tore apart a computer,
+upgraded it, reassembled it, ran local AI,
+generated images, and built a project.
+
+That's more than most adults have done.</p><p class="hook-note">What's next is up to you.</p></div></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ACTIVITIES ══════════════ -->
+<div class="section" id="sec-activities">
+  <div class="act-filters">
+    <span>Filter:</span>
+    <button class="filt-btn active" onclick="filterActs('all',this)">All</button>
+    <button class="filt-btn" onclick="filterActs('hardware',this)">🔧 Hardware</button>
+    <button class="filt-btn" onclick="filterActs('ai',this)">🤖 AI</button>
+    <button class="filt-btn" onclick="filterActs('build',this)">💻 Build Lab</button>
+    <button class="filt-btn" onclick="filterActs('scratch',this)">😺 Scratch</button>
+    <button class="filt-btn" onclick="filterActs('ml',this)">🧠 ML</button>
+  </div>
+  <div class="acts-grid" id="acts-grid">
+    <div class="act-card" id="act1" data-cat="hardware" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #2d9e5f">
+    <span class="act-icon">🔧</span>
+    <div class="act-meta">
+      <div class="act-title">Component Scavenger Hunt</div>
+      <div class="act-diff" style="color:#2d9e5f">Beginner · Hardware</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act1')">▼</button>
+  </div>
+  <div class="act-body" id="body-act1" style="display:none">
+    <p class="act-desc">Open a real computer and find every part inside. You touched the same technology that runs AI — just smaller scale.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Open the side panel (slide back or unscrew, no tools needed on most)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Find each part and check it off: motherboard, CPU fan/cooler, RAM sticks, GPU (big card), power supply, hard drive or SSD, case fans</pre></div><div class="act-step"><span class="step-n">3</span><pre>For each part: write ONE thing you notice — color, size, weight, texture, how many there are</pre></div><div class="act-step"><span class="step-n">4</span><pre>Spotted something NOT on the list? Write it down and ask the AI what it is!</pre></div><div class="act-step"><span class="step-n">5</span><pre>💬 Ask AI: 'What does a [part name] do? Explain it simply.'</pre></div>
+  </div>
+</div><div class="act-card" id="act2" data-cat="hardware" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #2d9e5f">
+    <span class="act-icon">🎮</span>
+    <div class="act-meta">
+      <div class="act-title">GPU Removal & Examination</div>
+      <div class="act-diff" style="color:#2d9e5f">Intermediate · Hardware</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act2')">▼</button>
+  </div>
+  <div class="act-body" id="body-act2" style="display:none">
+    <p class="act-desc">The GPU is the part that runs AI models. Remove it, look closely, and put it back.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Disconnect any PCIe power cables from the GPU (the 6 or 8-pin connectors)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Unscrew the small screw at the bracket on the back of the case</pre></div><div class="act-step"><span class="step-n">3</span><pre>Press and HOLD the PCIe release clip at the far end of the slot — it's spring-loaded</pre></div><div class="act-step"><span class="step-n">4</span><pre>Gently rock the GPU side to side to release it — never yank straight up</pre></div><div class="act-step"><span class="step-n">5</span><pre>Look for: VRAM chips (small black squares), fan blades, video ports (HDMI, DisplayPort)</pre></div><div class="act-step"><span class="step-n">6</span><pre>Reinstall: lower it in, press until the clip clicks, reattach power cable</pre></div><div class="act-step"><span class="step-n">7</span><pre>💬 Ask AI: 'Why does AI need a GPU? What makes it different from a CPU?'</pre></div>
+  </div>
+</div><div class="act-card" id="act3" data-cat="hardware" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #2d9e5f">
+    <span class="act-icon">💾</span>
+    <div class="act-meta">
+      <div class="act-title">RAM Upgrade</div>
+      <div class="act-diff" style="color:#2d9e5f">Intermediate · Hardware</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act3')">▼</button>
+  </div>
+  <div class="act-body" id="body-act3" style="display:none">
+    <p class="act-desc">RAM is the workspace — the more you have, the bigger the AI model you can run. Practice removing and upgrading.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Find the RAM slots — there are usually 2 or 4 colored slots</pre></div><div class="act-step"><span class="step-n">2</span><pre>Press BOTH latches at the same time to pop a stick out (it pops up at an angle)</pre></div><div class="act-step"><span class="step-n">3</span><pre>Look at the label: DDR3? DDR4? How many GB?</pre></div><div class="act-step"><span class="step-n">4</span><pre>Look at the notch on the connector — it won't fit backward (that's a safety feature!)</pre></div><div class="act-step"><span class="step-n">5</span><pre>Reinstall: line up the notch, press down firmly until BOTH latches click back in</pre></div><div class="act-step"><span class="step-n">6</span><pre>Dual channel tip: for maximum speed, matching sticks go in slots 1+3 (or 2+4)</pre></div><div class="act-step"><span class="step-n">7</span><pre>💬 Ask AI: 'How much RAM do I need to run a 7B parameter AI model?'</pre></div>
+  </div>
+</div><div class="act-card" id="act4" data-cat="hardware" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #2d9e5f">
+    <span class="act-icon">🔌</span>
+    <div class="act-meta">
+      <div class="act-title">Full Reassembly Challenge</div>
+      <div class="act-diff" style="color:#2d9e5f">Advanced · Hardware</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act4')">▼</button>
+  </div>
+  <div class="act-body" id="body-act4" style="display:none">
+    <p class="act-desc">Put the whole machine back together from scratch. If it boots, you win.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Order matters: CPU → thermal paste (pea-sized dot) → cooler → RAM → storage → GPU</pre></div><div class="act-step"><span class="step-n">2</span><pre>Front panel cables are the hardest — check the motherboard manual for 'JFP1' or 'F_PANEL'</pre></div><div class="act-step"><span class="step-n">3</span><pre>PSU main power: 24-pin big connector to the side of the motherboard</pre></div><div class="act-step"><span class="step-n">4</span><pre>PSU CPU power: 4 or 8-pin square connector near the top of the board</pre></div><div class="act-step"><span class="step-n">5</span><pre>Cable manage: tuck wires away from fans</pre></div><div class="act-step"><span class="step-n">6</span><pre>Close case → power on → listen for one POST beep = success!</pre></div><div class="act-step"><span class="step-n">7</span><pre>If nothing happens: check front panel power connector and reseat RAM</pre></div><div class="act-step"><span class="step-n">8</span><pre>💬 Ask AI: 'What does POST stand for and what does it check?'</pre></div>
+  </div>
+</div><div class="act-card" id="act5" data-cat="hardware" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #2d9e5f">
+    <span class="act-icon">🏷️</span>
+    <div class="act-meta">
+      <div class="act-title">30-Second Teach-Back</div>
+      <div class="act-diff" style="color:#2d9e5f">Beginner · Hardware</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act5')">▼</button>
+  </div>
+  <div class="act-body" id="body-act5" style="display:none">
+    <p class="act-desc">You just learned it — now prove it. Explain one component in 30 seconds with no notes.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Each person gets assigned a component or picks one</pre></div><div class="act-step"><span class="step-n">2</span><pre>Timer starts: 30 seconds — explain what it is, what it does, one cool fact</pre></div><div class="act-step"><span class="step-n">3</span><pre>No notes, no looking at the slides</pre></div><div class="act-step"><span class="step-n">4</span><pre>Audience: thumbs up if you understood, thumbs down to ask a follow-up</pre></div><div class="act-step"><span class="step-n">5</span><pre>Swap and repeat until everyone has gone once</pre></div><div class="act-step"><span class="step-n">6</span><pre>Components to cover: CPU, GPU, RAM, motherboard, PSU, HDD, SSD, NVMe, thermal paste, PCIe slot, BIOS, VRAM</pre></div><div class="act-step"><span class="step-n">7</span><pre>💬 Afterward: ask the AI for 3 more facts about your component to level up</pre></div>
+  </div>
+</div><div class="act-card" id="act6" data-cat="ai" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #6c63ff">
+    <span class="act-icon">💬</span>
+    <div class="act-meta">
+      <div class="act-title">Meet Your AI — Intro Chatbot Activity</div>
+      <div class="act-diff" style="color:#6c63ff">Beginner · Ai</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act6')">▼</button>
+  </div>
+  <div class="act-body" id="body-act6" style="display:none">
+    <p class="act-desc">Your first real conversation with AI. Connected to what we just learned about AI history and how it works.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Open ai-helper.html — this is a local AI running on YOUR laptop, no internet needed</pre></div><div class="act-step"><span class="step-n">2</span><pre>Set skill level to 🌱 New to this</pre></div><div class="act-step"><span class="step-n">3</span><pre>Try these prompts one by one and read each answer:
+  'What is AI?' 
+  'Explain what a large language model is simply'
+  'What happened in AI in 1997 with chess?'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Now ask something YOU'RE curious about — no wrong questions</pre></div><div class="act-step"><span class="step-n">5</span><pre>Change the skill level to 🚀 Expert — ask the same question again. See the difference?</pre></div><div class="act-step"><span class="step-n">6</span><pre>💬 Share: what was the most surprising thing the AI said?</pre></div>
+  </div>
+</div><div class="act-card" id="act7" data-cat="ai" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #6c63ff">
+    <span class="act-icon">🎯</span>
+    <div class="act-meta">
+      <div class="act-title">Prompt Engineering — 3 Levels</div>
+      <div class="act-diff" style="color:#6c63ff">Beginner · Ai</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act7')">▼</button>
+  </div>
+  <div class="act-body" id="body-act7" style="display:none">
+    <p class="act-desc">The same question asked 3 different ways gets 3 very different answers. Learn to communicate with AI like a pro.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Pick a topic: something about computers, AI, or something you're curious about</pre></div><div class="act-step"><span class="step-n">2</span><pre>Level 1 — Basic: just type the topic name. Send it. Read the answer.</pre></div><div class="act-step"><span class="step-n">3</span><pre>Level 2 — Medium: add your skill level and what format you want.
+  Example: 'Explain [topic] to a beginner. Use a simple analogy.'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Level 3 — Best: add role + context + task + constraints.
+  Example: 'You are a patient teacher. I am 14 and new to computers. Explain [topic] using an everyday analogy. Keep it under 5 sentences.'</pre></div><div class="act-step"><span class="step-n">5</span><pre>Compare all 3 responses. What changed?</pre></div><div class="act-step"><span class="step-n">6</span><pre>💡 Rule: More specific = better answer. Every time.</pre></div><div class="act-step"><span class="step-n">7</span><pre>Save your Level 3 prompt — use this style for your project!</pre></div>
+  </div>
+</div><div class="act-card" id="act8" data-cat="ai" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #6c63ff">
+    <span class="act-icon">🐛</span>
+    <div class="act-meta">
+      <div class="act-title">Fix Buggy Code with AI</div>
+      <div class="act-diff" style="color:#6c63ff">Beginner · Ai</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act8')">▼</button>
+  </div>
+  <div class="act-body" id="body-act8" style="display:none">
+    <p class="act-desc">Even professional developers use AI to find and fix bugs. Practice the same workflow right now.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Go to the Build Lab tab (or AI Helper → Code Helper)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Paste this code exactly:
+
+def greet(name
+    print('Hello ' + name)
+
+greet('REACT Camp'
+greet(42)</pre></div><div class="act-step"><span class="step-n">3</span><pre>Ask the AI: 'Find and explain all the bugs in this code'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Read the explanation carefully — the AI tells you WHY each thing is wrong</pre></div><div class="act-step"><span class="step-n">5</span><pre>Now ask: 'Show me the fixed version with comments explaining each change'</pre></div><div class="act-step"><span class="step-n">6</span><pre>Try it: copy the fixed code into Build Lab → run it</pre></div><div class="act-step"><span class="step-n">7</span><pre>Bonus: Add a line that prints 'Goodbye, [name]!' and ask the AI to help you</pre></div>
+  </div>
+</div><div class="act-card" id="act9" data-cat="ai" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #6c63ff">
+    <span class="act-icon">🤖</span>
+    <div class="act-meta">
+      <div class="act-title">Ask AI About Your Machine</div>
+      <div class="act-diff" style="color:#6c63ff">Beginner · Ai</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act9')">▼</button>
+  </div>
+  <div class="act-body" id="body-act9" style="display:none">
+    <p class="act-desc">You just looked inside a real computer. Now use AI to go deeper on every part you saw.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>For each component you found in the computer, ask:
+  'What does a [part] do? Give me one cool fact about it.'</pre></div><div class="act-step"><span class="step-n">2</span><pre>Ask: 'Which component matters most for running AI models and why?'</pre></div><div class="act-step"><span class="step-n">3</span><pre>Ask: 'What's the difference between how a CPU and GPU handle math?'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Ask: 'How much RAM would I need to run an AI like ChatGPT locally?'</pre></div><div class="act-step"><span class="step-n">5</span><pre>Ask: 'What is VRAM and why does it matter for AI?'</pre></div><div class="act-step"><span class="step-n">6</span><pre>Write down 3 things you learned that surprised you</pre></div><div class="act-step"><span class="step-n">7</span><pre>💬 Share your most interesting finding with the class</pre></div>
+  </div>
+</div><div class="act-card" id="act10" data-cat="ai" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #6c63ff">
+    <span class="act-icon">⚖️</span>
+    <div class="act-meta">
+      <div class="act-title">AI Ethics Discussion</div>
+      <div class="act-diff" style="color:#6c63ff">Any · Ai</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act10')">▼</button>
+  </div>
+  <div class="act-body" id="body-act10" style="display:none">
+    <p class="act-desc">Real questions about AI with no easy answers. Connected to real things happening in the world right now.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Scenario 1 — Hiring Bias: A company trained AI on 10 years of hires. The data mostly shows male hires from 3 schools. The AI now filters out others. Who's responsible?</pre></div><div class="act-step"><span class="step-n">2</span><pre>Scenario 2 — Your Phone: Your phone has your location, microphone, camera, messages. This trains AI. Did you agree? Is 'free in exchange for data' fair?</pre></div><div class="act-step"><span class="step-n">3</span><pre>Scenario 3 — AI Art: Image AI was trained on billions of images — including copyrighted art — without asking artists. You made images with it. Who owns them?</pre></div><div class="act-step"><span class="step-n">4</span><pre>Scenario 4 — Jobs: AI is doing parts of writing, coding, and customer service jobs. New jobs appeared: AI trainer, prompt engineer. Is this different from the Industrial Revolution?</pre></div><div class="act-step"><span class="step-n">5</span><pre>For each: one person argues FOR, one argues AGAINST — then class votes</pre></div><div class="act-step"><span class="step-n">6</span><pre>💬 Ask the AI: 'What are the strongest arguments for and against [scenario]?' — compare to your debate</pre></div>
+  </div>
+</div><div class="act-card" id="act11" data-cat="ai" data-locked="true">
+  <div class="act-header" style="border-left:4px solid #6c63ff">
+    <span class="act-icon">🎨</span>
+    <div class="act-meta">
+      <div class="act-title">Generate Images with AI</div>
+      <div class="act-diff" style="color:#6c63ff">Intermediate · Ai</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act11')">▼</button>
+  </div>
+  <div class="act-body" id="body-act11" style="display:none">
+    <p class="act-desc">AI can create images from text. The same GPU we studied is what makes this work.</p>
+    <div class="lock-bar">🔒 Requires Stable Diffusion running locally (start-ollama.bat)</div><div class="act-step"><span class="step-n">1</span><pre>Open AI Helper → Image tab (requires Stable Diffusion to be running on this laptop)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Try this prompt first:
+  'a friendly robot sitting at a desk coding, digital art style, vibrant neon colors, dark background'</pre></div><div class="act-step"><span class="step-n">3</span><pre>Try the same prompt with different styles:
+  '...watercolor style' / '...pixel art style' / '...realistic photograph'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Use the negative prompt box: add 'blurry, bad quality, distorted' — see if quality improves</pre></div><div class="act-step"><span class="step-n">5</span><pre>Generate 3 images for your project (background, character, or icon)</pre></div><div class="act-step"><span class="step-n">6</span><pre>Save images: right-click → Save As</pre></div><div class="act-step"><span class="step-n">7</span><pre>Add to your project: <img src='your-image.png'></pre></div>
+  </div>
+</div><div class="act-card" id="act12" data-cat="build" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #c73b6e">
+    <span class="act-icon">🌐</span>
+    <div class="act-meta">
+      <div class="act-title">Build 1: Your First HTML Page</div>
+      <div class="act-diff" style="color:#c73b6e">Beginner · Build</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act12')">▼</button>
+  </div>
+  <div class="act-body" id="body-act12" style="display:none">
+    <p class="act-desc">No typing code from scratch — use AI as your coding partner. You prompt it, it writes, you see results instantly in the preview. This is how modern developers work.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Go to the Build Lab tab</pre></div><div class="act-step"><span class="step-n">2</span><pre>Open the AI panel (click 'Ask AI' button)</pre></div><div class="act-step"><span class="step-n">3</span><pre>Type this prompt:
+  'Generate an HTML page with 5 fun facts about [your favorite topic]. Include a big headline (h1), a numbered list of facts, and a simple paragraph at the bottom. Add a comment explaining each section.'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Copy the HTML the AI gives you into the HTML editor tab</pre></div><div class="act-step"><span class="step-n">5</span><pre>Click ▶ Run — your page appears in the preview pane instantly!</pre></div><div class="act-step"><span class="step-n">6</span><pre>Try asking: 'Can you change the headline text to say REACT Camp?'</pre></div><div class="act-step"><span class="step-n">7</span><pre>💡 Connection: the code the AI writes is understood by the same CPU that runs your browser</pre></div>
+  </div>
+</div><div class="act-card" id="act13" data-cat="build" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #c73b6e">
+    <span class="act-icon">🎨</span>
+    <div class="act-meta">
+      <div class="act-title">Build 2: Style It with CSS</div>
+      <div class="act-diff" style="color:#c73b6e">Beginner · Build</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act13')">▼</button>
+  </div>
+  <div class="act-body" id="body-act13" style="display:none">
+    <p class="act-desc">CSS is what makes web pages look good instead of plain black text. Ask the AI to style your page — then tweak it yourself.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Start with your HTML from Build 1 (or paste any basic HTML into the editor)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Click the CSS tab in the Build Lab</pre></div><div class="act-step"><span class="step-n">3</span><pre>Ask AI:
+  'Add CSS for my page: colorful gradient background (purple to blue), centered text, max-width 700px centered on the page, and a large readable font. Explain each property.'</pre></div><div class="act-step"><span class="step-n">4</span><pre>Paste the CSS into the CSS tab → click ▶ Run</pre></div><div class="act-step"><span class="step-n">5</span><pre>Change one color in the CSS yourself — what happens?</pre></div><div class="act-step"><span class="step-n">6</span><pre>Ask AI: 'What does max-width do and why is it useful?'</pre></div><div class="act-step"><span class="step-n">7</span><pre>Challenge: ask the AI to make the headline a different color than the body text</pre></div>
+  </div>
+</div><div class="act-card" id="act14" data-cat="build" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #c73b6e">
+    <span class="act-icon">✨</span>
+    <div class="act-meta">
+      <div class="act-title">Build 3: CSS Animation</div>
+      <div class="act-diff" style="color:#c73b6e">Intermediate · Build</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act14')">▼</button>
+  </div>
+  <div class="act-body" id="body-act14" style="display:none">
+    <p class="act-desc">Make your page move. CSS animations run on the GPU — the same part we studied in the computer teardown.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Have your styled HTML + CSS from Builds 1–2 (or ask AI to generate a starter)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Ask AI:
+  'Add a CSS animation that makes the background gradient smoothly cycle through 3 colors. Also make the headline fade in when the page loads. Add comments explaining @keyframes.'</pre></div><div class="act-step"><span class="step-n">3</span><pre>Paste the new animation CSS into the CSS tab</pre></div><div class="act-step"><span class="step-n">4</span><pre>Click ▶ Run — the animation plays in the preview!</pre></div><div class="act-step"><span class="step-n">5</span><pre>Adjust the animation-duration value: try 2s vs 10s — see the speed change</pre></div><div class="act-step"><span class="step-n">6</span><pre>Ask AI: 'What is @keyframes and how does it work?'</pre></div><div class="act-step"><span class="step-n">7</span><pre>💡 Real-world connection: game animations, loading spinners, UI effects all use this same technique</pre></div>
+  </div>
+</div><div class="act-card" id="act15" data-cat="build" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #c73b6e">
+    <span class="act-icon">⚡</span>
+    <div class="act-meta">
+      <div class="act-title">Build 4: JavaScript Interactivity</div>
+      <div class="act-diff" style="color:#c73b6e">Intermediate · Build</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act15')">▼</button>
+  </div>
+  <div class="act-body" id="body-act15" style="display:none">
+    <p class="act-desc">JavaScript makes pages DO things. Click a button, something happens. This is what separates a webpage from an app.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Have your animated page from Builds 1–3 ready (or start fresh with AI)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Ask AI:
+  'For my HTML page with a fact list: hide all the facts by default. Add a button that says Show a Fact. When clicked, it reveals one random fact from the list. Use simple JavaScript and explain every line with a comment.'</pre></div><div class="act-step"><span class="step-n">3</span><pre>Paste the JavaScript into the JS tab</pre></div><div class="act-step"><span class="step-n">4</span><pre>Click ▶ Run — test the button! Does it work?</pre></div><div class="act-step"><span class="step-n">5</span><pre>If something's wrong, tell the AI exactly what happened:
+  'The button shows nothing. Here's my code: [paste code]'</pre></div><div class="act-step"><span class="step-n">6</span><pre>Keep asking the AI to improve it: 'Now make it show a different fact each time' or 'Add a fact counter'</pre></div><div class="act-step"><span class="step-n">7</span><pre>💡 This is exactly how pro developers work: build one feature, test it, debug with AI, repeat</pre></div>
+  </div>
+</div><div class="act-card" id="act16" data-cat="build" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #c73b6e">
+    <span class="act-icon">🔌</span>
+    <div class="act-meta">
+      <div class="act-title">Build 5: Code for Arduino/Micro:Bit with AI</div>
+      <div class="act-diff" style="color:#c73b6e">Intermediate · Build</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act16')">▼</button>
+  </div>
+  <div class="act-body" id="body-act16" style="display:none">
+    <p class="act-desc">Microcontrollers like Arduino and BBC Micro:Bit are small computers — just like the ones we opened, but tiny and made for projects. AI can write the code for you.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Tell the AI what microcontroller you have: Arduino or BBC Micro:Bit</pre></div><div class="act-step"><span class="step-n">2</span><pre>Ask AI:
+  'I have an Arduino Uno. Write simple code to blink an LED on pin 13 every second. Explain each line.'</pre></div><div class="act-step"><span class="step-n">3</span><pre>Read the code — even if you don't understand it all, you can see patterns (delay, pinMode, digitalWrite)</pre></div><div class="act-step"><span class="step-n">4</span><pre>Ask AI: 'What does void loop() mean in Arduino? Why do we need loop?'</pre></div><div class="act-step"><span class="step-n">5</span><pre>Try modifying one number (the delay time) and ask AI what will change</pre></div><div class="act-step"><span class="step-n">6</span><pre>Challenge: Ask AI to write code for a button that controls the LED — or a sensor that reads temperature</pre></div><div class="act-step"><span class="step-n">7</span><pre>💬 Connection: this same CPU principle runs in your Arduino — it's just a tiny version of what we disassembled</pre></div>
+  </div>
+</div><div class="act-card" id="act17" data-cat="build" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #c73b6e">
+    <span class="act-icon">🚀</span>
+    <div class="act-meta">
+      <div class="act-title">Build 6: Your Final Project</div>
+      <div class="act-diff" style="color:#c73b6e">Advanced · Build</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act17')">▼</button>
+  </div>
+  <div class="act-body" id="body-act17" style="display:none">
+    <p class="act-desc">Everything you've learned goes into one project. Use AI as your coding partner — not to do it FOR you, but to help you go faster and further.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Pick your project (or combine ideas):
+  🎮 Quiz Game  📖 Story Generator  🐾 Virtual Pet  🌡️ Arduino/Sensor Project  🤖 AI Chatbot page</pre></div><div class="act-step"><span class="step-n">2</span><pre>Start in the Build Lab with this prompt:
+  'I want to build [describe your project]. I am a student learning to code. Generate a starter template in HTML/CSS/JavaScript. Explain the structure. Keep it simple.'</pre></div><div class="act-step"><span class="step-n">3</span><pre>Build one feature at a time. Test after each addition.</pre></div><div class="act-step"><span class="step-n">4</span><pre>When stuck: tell the AI exactly what's wrong — 'When I click the button, nothing happens. Here's my code...'</pre></div><div class="act-step"><span class="step-n">5</span><pre>When it works: ask the AI 'What could I add to make this cooler?'</pre></div><div class="act-step"><span class="step-n">6</span><pre>Save your progress (copy your code to a .html file)</pre></div><div class="act-step"><span class="step-n">7</span><pre>Prepare your 2-minute demo: what it does, how you built it, what you'd add next</pre></div>
+  </div>
+</div><div class="act-card" id="act18" data-cat="scratch" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #f5a623">
+    <span class="act-icon">😺</span>
+    <div class="act-meta">
+      <div class="act-title">Face Detection in Scratch</div>
+      <div class="act-diff" style="color:#f5a623">Beginner · Scratch</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act18')">▼</button>
+  </div>
+  <div class="act-body" id="body-act18" style="display:none">
+    <p class="act-desc">Scratch has a free AI extension that uses your webcam to detect faces and body position. No code, just visual blocks.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Go to scratch.mit.edu (free, no account needed to try)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Click Create → then the puzzle-piece Extensions button (bottom left)</pre></div><div class="act-step"><span class="step-n">3</span><pre>Add the 'Video Sensing' extension (detects motion from webcam)</pre></div><div class="act-step"><span class="step-n">4</span><pre>Or search for 'Face Sensing' extension if available in your Scratch version</pre></div><div class="act-step"><span class="step-n">5</span><pre>Create a sprite. Add these blocks:
+  when green flag clicked → forever → if [face detected] then [say Hello!]</pre></div><div class="act-step"><span class="step-n">6</span><pre>Test it: wave in front of the camera — does the sprite react?</pre></div><div class="act-step"><span class="step-n">7</span><pre>Ask AI in Build Lab: 'How does face detection AI work? What is it actually detecting?'</pre></div><div class="act-step"><span class="step-n">8</span><pre>💡 Connection: this is the same computer vision AI used in Face ID on phones</pre></div>
+  </div>
+</div><div class="act-card" id="act19" data-cat="scratch" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #f5a623">
+    <span class="act-icon">🎮</span>
+    <div class="act-meta">
+      <div class="act-title">Face-Controlled Game in Scratch</div>
+      <div class="act-diff" style="color:#f5a623">Intermediate · Scratch</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act19')">▼</button>
+  </div>
+  <div class="act-body" id="body-act19" style="display:none">
+    <p class="act-desc">Control a game with your face or body movement. This is real AI-powered game control — no controller needed.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Open scratch.mit.edu → Create a new project</pre></div><div class="act-step"><span class="step-n">2</span><pre>Add the Video Sensing extension</pre></div><div class="act-step"><span class="step-n">3</span><pre>Create a simple game: a ball that the player must 'catch' by moving in front of the camera</pre></div><div class="act-step"><span class="step-n">4</span><pre>The ball moves across the screen; the player's video motion (detected by AI) triggers 'catching' it</pre></div><div class="act-step"><span class="step-n">5</span><pre>Blocks you'll need:
+  - set video transparency
+  - video motion > [threshold] on sprite
+  - change score by 1</pre></div><div class="act-step"><span class="step-n">6</span><pre>Ask AI in Build Lab: 'I'm making a Scratch game where video motion controls a player. Give me a step-by-step plan.'</pre></div><div class="act-step"><span class="step-n">7</span><pre>Try it with a partner — compare reaction times with face control vs. keyboard control</pre></div><div class="act-step"><span class="step-n">8</span><pre>💡 Real world: this is how motion-controlled fitness games (Just Dance, Ring Fit) work</pre></div>
+  </div>
+</div><div class="act-card" id="act20" data-cat="ml" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #e056b4">
+    <span class="act-icon">🧠</span>
+    <div class="act-meta">
+      <div class="act-title">Train Your First AI Model</div>
+      <div class="act-diff" style="color:#e056b4">Beginner · Ml</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act20')">▼</button>
+  </div>
+  <div class="act-body" id="body-act20" style="display:none">
+    <p class="act-desc">Teachable Machine lets you train a real image classifier in minutes using your webcam. No code. You collect data, train, and test — the same process the big AI labs use, just smaller.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>Go to teachablemachine.withgoogle.com (free, no account needed)</pre></div><div class="act-step"><span class="step-n">2</span><pre>Click Get Started → Image Project → Standard image model</pre></div><div class="act-step"><span class="step-n">3</span><pre>Create 3 classes — things to classify. Examples:
+  thumbs up / thumbs down / nothing
+  open hand / closed fist / nothing
+  red card / blue card / nothing</pre></div><div class="act-step"><span class="step-n">4</span><pre>Record 50–100 photos per class using your webcam</pre></div><div class="act-step"><span class="step-n">5</span><pre>Click Train Model — watch the accuracy numbers increase!</pre></div><div class="act-step"><span class="step-n">6</span><pre>Test it: hold up different things — how accurate is it?</pre></div><div class="act-step"><span class="step-n">7</span><pre>Ask AI: 'What is a training epoch? Why do more photos = better accuracy?'</pre></div><div class="act-step"><span class="step-n">8</span><pre>💡 This is the EXACT same process used to train facial recognition, medical AI, and self-driving cars — just scaled up to millions of examples</pre></div>
+  </div>
+</div><div class="act-card" id="act21" data-cat="ml" data-locked="false">
+  <div class="act-header" style="border-left:4px solid #e056b4">
+    <span class="act-icon">🤖</span>
+    <div class="act-meta">
+      <div class="act-title">AI Model in Scratch</div>
+      <div class="act-diff" style="color:#e056b4">Intermediate · Ml</div>
+    </div>
+    <button class="act-toggle" onclick="toggleAct('act21')">▼</button>
+  </div>
+  <div class="act-body" id="body-act21" style="display:none">
+    <p class="act-desc">Export your Teachable Machine model and use it to control a Scratch game. Your trained AI controls the game.</p>
+    <div class="act-step"><span class="step-n">1</span><pre>First complete the 'Train Your First AI Model' activity above</pre></div><div class="act-step"><span class="step-n">2</span><pre>In Teachable Machine: click Export Model → Upload (to cloud) → Copy the link</pre></div><div class="act-step"><span class="step-n">3</span><pre>Go to machinelearningforkids.co.uk or use the ML2Scratch extension</pre></div><div class="act-step"><span class="step-n">4</span><pre>In Scratch: add the Teachable Machine or ML extension</pre></div><div class="act-step"><span class="step-n">5</span><pre>Connect it to your exported model using the URL you copied</pre></div><div class="act-step"><span class="step-n">6</span><pre>Create a simple game that your model controls:
+  - Show thumbs up → sprite moves right
+  - Show thumbs down → sprite moves left
+  - Closed fist → sprite jumps</pre></div><div class="act-step"><span class="step-n">7</span><pre>Ask AI: 'How is a Scratch extension different from the AI model itself?'</pre></div><div class="act-step"><span class="step-n">8</span><pre>💡 Connection: you just built the same architecture as AI-powered accessibility tools (gesture control for disabled users)</pre></div>
+  </div>
+</div>
+  </div>
+</div>
+
+<!-- ══════════════ GAMES ══════════════ -->
+<div class="section" id="sec-games">
+  <div class="games-nav">
+    <button class="game-tab active" onclick="showGame('hw-quiz')">🔧 Hardware Quiz</button>
+    <button class="game-tab" onclick="showGame('ai-quiz')">🤖 AI Quiz</button>
+    <button class="game-tab" onclick="showGame('code-fix')">🐛 Code Fix</button>
+  </div>
+
+  <!-- Hardware Quiz -->
+  <div class="game-panel active" id="game-hw-quiz">
+    <div class="quiz-score" id="hw-score">Question 1 of 15</div>
+    <div class="quiz-q" id="hw-q"></div>
+    <div class="quiz-opts" id="hw-opts"></div>
+    <div class="quiz-feedback" id="hw-fb"></div>
+    <button class="quiz-next" id="hw-next" onclick="hwNext()" style="display:none">Next →</button>
+    <div id="hw-result" class="quiz-result" style="display:none"></div>
+  </div>
+
+  <!-- AI Quiz -->
+  <div class="game-panel" id="game-ai-quiz">
+    <div class="quiz-score" id="ai-score">Question 1 of 15</div>
+    <div class="quiz-q" id="ai-q"></div>
+    <div class="quiz-opts" id="ai-opts"></div>
+    <div class="quiz-feedback" id="ai-fb"></div>
+    <button class="quiz-next" id="ai-next" onclick="aiNext()" style="display:none">Next →</button>
+    <div id="ai-result" class="quiz-result" style="display:none"></div>
+  </div>
+
+  <!-- Code Fix -->
+  <div class="game-panel" id="game-code-fix">
+    <div class="quiz-score" id="bug-score">Bug 1 of 5</div>
+    <div class="bug-title" id="bug-title"></div>
+    <div class="bug-desc" id="bug-desc"></div>
+    <div class="bug-hint" id="bug-hint"></div>
+    <div class="code-boxes">
+      <div class="code-box"><label>🐛 Buggy Code</label><pre id="bug-bad"></pre></div>
+      <div class="code-box" id="bug-fixed-box" style="display:none"><label>✅ Fixed</label><pre id="bug-fixed"></pre></div>
+    </div>
+    <div class="bug-actions">
+      <button class="bug-btn btn-hint" onclick="showHint()">💡 Hint</button>
+      <button class="bug-btn btn-reveal" onclick="revealFix()">👁 Reveal Fix</button>
+      <button class="bug-btn btn-next-bug" onclick="nextBug()">Next Bug →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ BUILD LAB ══════════════ -->
+<div class="section" id="sec-build">
+  <div class="build-bar">
+    <button class="build-tab active" onclick="setEditorTab('html')">HTML</button>
+    <button class="build-tab" onclick="setEditorTab('css')">CSS</button>
+    <button class="build-tab" onclick="setEditorTab('js')">JavaScript</button>
+    <button class="build-run" onclick="runPreview()">▶ Run</button>
+    <button class="build-ai" onclick="toggleAiPane()">🤖 Ask AI</button>
+    <button class="build-tab" onclick="clearEditor()" style="margin-left:4px">🗑 Clear</button>
+  </div>
+  <div class="build-main" id="build-main">
+    <div class="editor-pane">
+      <textarea class="code-editor" id="editor-html" placeholder="<!-- Write HTML here -->
+<h1>Hello, World!</h1>"></textarea>
+      <textarea class="code-editor" id="editor-css" style="display:none" placeholder="/* Write CSS here */
+body { font-family: sans-serif; }"></textarea>
+      <textarea class="code-editor" id="editor-js" style="display:none" placeholder="// Write JavaScript here
+console.log('Hello!');"></textarea>
+    </div>
+    <div class="preview-pane" id="preview-pane">
+      <label>Preview</label>
+      <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+    <div class="ai-pane" id="ai-pane">
+      <div class="ai-messages" id="build-ai-msgs"></div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="build-ai-input" placeholder="Ask AI to write or fix code..." onkeydown="if(event.key==='Enter')sendBuildAI()"/>
+        <button class="ai-send" onclick="sendBuildAI()">Send</button>
+      </div>
+    </div>
+  </div>
+  <div class="build-activities">
+    <h4>Quick Start Activities</h4>
+    <div class="build-act-chips">
+      <div class="build-chip" onclick="loadBuildActivity('html1')">🌐 HTML Page (Activity 1)</div>
+      <div class="build-chip" onclick="loadBuildActivity('css1')">🎨 Add CSS (Activity 2)</div>
+      <div class="build-chip" onclick="loadBuildActivity('anim1')">✨ CSS Animation (Activity 3)</div>
+      <div class="build-chip" onclick="loadBuildActivity('js1')">⚡ Add JavaScript (Activity 4)</div>
+      <div class="build-chip" onclick="loadBuildActivity('quiz')">❓ Quiz Game Starter</div>
+      <div class="build-chip" onclick="loadBuildActivity('pet')">🐾 Virtual Pet Starter</div>
+      <div class="build-chip" onclick="loadBuildActivity('story')">📖 Story Generator Starter</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SETTINGS ══════════════ -->
+<div class="section" id="sec-settings">
+  <div class="settings-card">
+    <h3>👤 Student Profile</h3>
+    <div class="setting-row">
+      <div><label>Student Name</label><small>Saved locally on this laptop</small></div>
+      <input class="student-input" id="student-name-input" placeholder="Your name" oninput="saveName()"/>
+    </div>
+  </div>
+  <div class="settings-card">
+    <h3>🔒 Teacher Controls <small id="pin-status" style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:8px">— locked</small></h3>
+    <div class="setting-row">
+      <div><label>Teacher PIN</label><small>Enter PIN to unlock controls</small></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input class="pin-input" id="pin-entry" type="password" placeholder="••••" maxlength="6"/>
+        <button class="pin-save" onclick="checkPin()">Unlock</button>
+      </div>
+    </div>
+    <div class="pin-section" id="teacher-controls">
+      <div class="setting-row">
+        <div><label>🎨 Image Generation</label><small>Requires Stable Diffusion running locally</small></div>
+        <label class="toggle"><input type="checkbox" id="tog-imggen" onchange="saveSetting('imggen',this.checked)"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div><label>🔧 Lock Hardware Activities</label><small>Hide hardware teardown activities</small></div>
+        <label class="toggle"><input type="checkbox" id="tog-hw" onchange="saveSetting('lockHw',this.checked)"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div><label>🌐 External Links</label><small>Allow links to cardboard.lofirobot.com etc.</small></div>
+        <label class="toggle"><input type="checkbox" id="tog-links" checked onchange="saveSetting('extLinks',this.checked)"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div><label>Change Teacher PIN</label></div>
+        <div style="display:flex;gap:6px">
+          <input class="pin-input" id="new-pin" type="password" placeholder="New PIN" maxlength="6"/>
+          <button class="pin-save" onclick="savePin()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="settings-card">
+    <h3>📊 Progress</h3>
+    <div id="progress-display" style="font-size:.84rem;color:var(--muted);line-height:2"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button onclick="clearProgress()" style="padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:.8rem">🗑 Reset Progress</button>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <h3>💾 Save &amp; Restore Progress</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">Export your progress to a file in your Google Drive folder so you can restore it on any laptop. Import loads it back in one click.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="exportProgress()" style="padding:10px 20px;background:var(--green);border:none;border-radius:10px;color:white;cursor:pointer;font-size:.88rem;font-weight:700">⬇️ Export My Progress</button>
+      <label style="padding:10px 20px;background:var(--accent);border-radius:10px;color:white;cursor:pointer;font-size:.88rem;font-weight:700;display:inline-block">
+        ⬆️ Import Progress
+        <input type="file" accept=".json" onchange="importProgress(event)" style="display:none"/>
+      </label>
+    </div>
+    <div id="save-status" style="margin-top:10px;font-size:.8rem;color:var(--green);min-height:18px"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const HW_QUIZ = [{"q": "What does CPU stand for?", "opts": ["Central Processing Unit", "Computer Power Unit", "Core Processing Utility", "Central Power Unit"], "a": 0}, {"q": "What does GPU stand for?", "opts": ["Graphics Processing Unit", "General Purpose Unit", "Graphic Power Utility", "Grid Processing Unit"], "a": 0}, {"q": "RAM is 'volatile' storage. What does that mean?", "opts": ["It's very fast", "Data is lost when power is off", "It can explode", "It's stored on a spinning disk"], "a": 1}, {"q": "Which type of storage is fastest?", "opts": ["HDD (Hard Disk Drive)", "SATA SSD", "NVMe M.2 SSD", "USB Flash Drive"], "a": 2}, {"q": "What is the motherboard's main job?", "opts": ["Store your files permanently", "Connect all components together", "Provide power to the system", "Cool the CPU"], "a": 1}, {"q": "What does PSU stand for?", "opts": ["Power Supply Unit", "Processor Speed Unit", "Parallel Storage Utility", "Processing System Unit"], "a": 0}, {"q": "What is VRAM?", "opts": ["Very Random Access Memory", "Video RAM — memory on the GPU", "Volatile RAM (old name for RAM)", "Virtual RAM used by the OS"], "a": 1}, {"q": "What is thermal paste used for?", "opts": ["Sticking the CPU to the motherboard", "Filling the gap between CPU and cooler for better heat transfer", "Lubricating fan bearings", "Sealing the case"], "a": 1}, {"q": "What does 'POST' stand for in computing?", "opts": ["Power On Self Test", "Processor Output Status Test", "Primary Operating System Test", "Peripheral Output Signal Test"], "a": 0}, {"q": "Which slot do graphics cards plug into?", "opts": ["PCI", "PCIe (PCI Express)", "M.2", "SATA"], "a": 1}, {"q": "What is 'dual channel' memory?", "opts": ["Having two different types of RAM", "Using two RAM sticks in paired slots for double bandwidth", "Running two operating systems", "Two hard drives mirrored together"], "a": 1}, {"q": "What does a case fan do?", "opts": ["Cools the CPU directly", "Moves air through the case to cool components", "Powers the system fans", "Controls the GPU temperature"], "a": 1}, {"q": "What information can you find in the BIOS?", "opts": ["Your files and documents", "CPU model, RAM amount, storage drives, temperatures", "Your internet settings", "Installed programs"], "a": 1}, {"q": "Approximately how much does a NVIDIA H100 GPU cost (the kind used for AI like ChatGPT)?", "opts": ["$500", "$3,000", "$30,000", "$300,000"], "a": 2}, {"q": "Which cable connects the motherboard to the power supply?", "opts": ["SATA cable", "24-pin ATX cable", "PCIe power cable", "Front panel cable"], "a": 1}];
+const AI_QUIZ = [{"q": "What does AI stand for?", "opts": ["Automated Interface", "Artificial Intelligence", "Algorithmic Implementation", "Adaptive Infrastructure"], "a": 1}, {"q": "Who first asked 'Can machines think?' in 1950?", "opts": ["Albert Einstein", "Alan Turing", "Ada Lovelace", "Andrew Ng"], "a": 1}, {"q": "What is a 'parameter' in an AI model?", "opts": ["A user setting in the AI app", "A number (weight) the model learned during training", "A type of GPU memory", "An input to a prompt"], "a": 1}, {"q": "What is 'inference' in AI?", "opts": ["Training the model on new data", "Using the trained model to answer questions", "Testing the model for bias", "Downloading a model"], "a": 1}, {"q": "Llama 3.2:3b has approximately how many parameters?", "opts": ["3 million", "3 billion", "3 trillion", "300 million"], "a": 1}, {"q": "What type of AI creates images from text descriptions?", "opts": ["Large Language Model (LLM)", "Diffusion Model", "Transformer", "Recurrent Neural Network"], "a": 1}, {"q": "What does 'hallucination' mean in AI?", "opts": ["The AI having emotions", "The AI generating false but confident information", "The AI being slow to respond", "The AI ignoring your question"], "a": 1}, {"q": "What is 'prompt engineering'?", "opts": ["Coding the AI model", "Crafting effective inputs to get better AI outputs", "Building AI hardware", "Training a new model"], "a": 1}, {"q": "Which is the best prompt for a beginner?", "opts": ["'Make me a quiz game'", "'I am a beginner learning HTML. Create a simple 5-question quiz game with a score counter. Explain each line with comments.'", "'Quiz game HTML please'", "'What is a quiz game?'"], "a": 1}, {"q": "What is Stable Diffusion?", "opts": ["A type of RAM", "A local AI image generation model", "A tool for balancing CPU load", "A type of SSD"], "a": 1}, {"q": "What was the first widely popular AI chatbot (launched 2022)?", "opts": ["Google Bard", "Siri", "ChatGPT", "Alexa"], "a": 2}, {"q": "What does 'local AI' mean?", "opts": ["AI made in your local city", "AI running on your own computer without sending data to the internet", "AI with a smaller model size", "AI that only answers local news questions"], "a": 1}, {"q": "Why do GPUs run AI better than CPUs?", "opts": ["GPUs have a faster clock speed", "GPUs can do thousands of math operations in parallel", "GPUs have more memory than CPUs", "GPUs are cheaper"], "a": 1}, {"q": "What is 'training data'?", "opts": ["The practice questions you give the AI during a session", "The examples the model learned from during training", "Data stored in training mode", "RAM used during model training"], "a": 1}, {"q": "What does CFG Scale control in image generation?", "opts": ["Image size in pixels", "How literally the AI follows your text prompt", "The number of generation steps", "The color palette used"], "a": 1}];
+const BUGS = [{"title": "Missing Parenthesis", "desc": "The function definition has a syntax error.", "bad": "def greet(name\n    print('Hello ' + name)\n\ngreet('World')", "fixed": "def greet(name):\n    print('Hello ' + name)\n\ngreet('World')", "hint": "Function definitions need a colon and proper parentheses"}, {"title": "Wrong Quote Type", "desc": "The string has mismatched quotes.", "bad": "let message = 'Hello World\";\nconsole.log(message);", "fixed": "let message = 'Hello World';\nconsole.log(message);", "hint": "Strings must start and end with the same type of quote"}, {"title": "Off by One", "desc": "This loop should print 1 through 5, but something's wrong.", "bad": "for (let i = 0; i < 5; i++) {\n    console.log(i);\n}", "fixed": "for (let i = 1; i <= 5; i++) {\n    console.log(i);\n}", "hint": "Think about what value i starts at and when the loop stops"}, {"title": "Missing Closing Bracket", "desc": "The HTML is broken — find the missing piece.", "bad": "<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>", "fixed": "<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</ul>", "hint": "Every opening tag needs a closing tag"}, {"title": "Variable Not Defined", "desc": "This code crashes. Why?", "bad": "function addNumbers(a, b) {\n    return a + b;\n}\n\nlet result = addNumbers(3, 4);\nconsole.log(sum);", "fixed": "function addNumbers(a, b) {\n    return a + b;\n}\n\nlet result = addNumbers(3, 4);\nconsole.log(result);", "hint": "The variable name used in the function call and the log don't match"}];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentDay = 1;
+let currentSlide = 0;
+let slideMode = 'read'; // 'read' | 'presenter'
+let pinUnlocked = false;
+const DEFAULT_PIN = '1234';
+let settings = JSON.parse(localStorage.getItem('react-settings') || '{"pin":"1234","imggen":false,"lockHw":false,"extLinks":true}');
+let progress = JSON.parse(localStorage.getItem('react-progress') || '{}');
+const daySlideCount = [{'num':1,'count':9},{'num':2,'count':9},{'num':3,'count':8},{'num':4,'count':7},{'num':5,'count':8}];
+let editorTab = 'html';
+let buildAiHistory = [];
+let hwIdx=0,hwScore=0,hwAnswered=false;
+let aiIdx=0,aiScore=0,aiAnswered=false;
+let bugIdx=0;
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='lessons') selectDay(currentDay);
+  if(id==='games') initGames();
+  if(id==='settings') loadSettings();
+  if(id==='build') setTimeout(runPreview,100);
+}
+
+// ── LESSONS ───────────────────────────────────────────────────────────────────
+function selectDay(num){
+  currentDay = num;
+  currentSlide = 0;
+  document.querySelectorAll('.day-slides').forEach(d=>d.style.display='none');
+  const slides = document.getElementById('day-slides-'+num);
+  if(slides) slides.style.display='block';
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('dbtn-'+num);
+  if(btn) btn.classList.add('active');
+  buildProgressDots();
+  if(slideMode==='presenter') goToSlide(0);
+}
+function buildProgressDots(){
+  const slides = document.querySelectorAll('#day-slides-'+currentDay+' .slide');
+  const prog = document.getElementById('slide-progress');
+  prog.innerHTML = '';
+  slides.forEach((s,i)=>{
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot'+(i===currentSlide?' active':'');
+    dot.onclick = ()=>goToSlide(i);
+    prog.appendChild(dot);
+  });
+  const nav = document.createElement('div');
+  nav.className = 'slide-nav';
+  nav.innerHTML = `<button class="snav-btn" onclick="prevSlide()">◀</button><span style="font-size:.8rem;color:var(--muted);padding:0 6px" id="slide-counter">${currentSlide+1}/${slides.length}</span><button class="snav-btn" onclick="nextSlide()">▶</button>`;
+  prog.appendChild(nav);
+}
+function goToSlide(idx){
+  const slides = document.querySelectorAll('#day-slides-'+currentDay+' .slide');
+  if(idx < 0 || idx >= slides.length) return;
+  currentSlide = idx;
+  if(slideMode==='presenter'){
+    slides.forEach((s,i)=>{s.classList.toggle('current-slide',i===idx);s.style.display=i===idx?'flex':'none';});
+  } else {
+    slides[idx].scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  document.querySelectorAll('.prog-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const ctr = document.getElementById('slide-counter');
+  if(ctr) ctr.textContent = (idx+1)+'/'+slides.length;
+}
+function nextSlide(){ goToSlide(currentSlide+1); }
+function prevSlide(){ goToSlide(currentSlide-1); }
+function setMode(m){
+  slideMode = m;
+  document.getElementById('mode-read').classList.toggle('active',m==='read');
+  document.getElementById('mode-pres').classList.toggle('active',m==='presenter');
+  if(m==='presenter'){
+    document.body.classList.add('presenter-mode');
+    const slides = document.querySelectorAll('#day-slides-'+currentDay+' .slide');
+    slides.forEach((s,i)=>{s.style.display=i===currentSlide?'flex':'none';s.classList.toggle('current-slide',i===currentSlide);});
+  } else {
+    document.body.classList.remove('presenter-mode');
+    const slides = document.querySelectorAll('#day-slides-'+currentDay+' .slide');
+    slides.forEach(s=>{s.style.display='';s.classList.remove('current-slide');});
+  }
+}
+function exitPresenter(){ setMode('read'); }
+function markDayDone(){
+  progress['day'+currentDay] = true;
+  localStorage.setItem('react-progress',JSON.stringify(progress));
+  const btn = document.getElementById('dbtn-'+currentDay);
+  if(btn && !btn.querySelector('.done-mark')){
+    const mark = document.createElement('span');
+    mark.className='done-mark';mark.textContent=' ✓';mark.style.color='var(--green)';
+    btn.appendChild(mark);
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(slideMode==='presenter'){
+    if(e.key==='ArrowRight'||e.key==='ArrowDown') nextSlide();
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp') prevSlide();
+    if(e.key==='Escape') exitPresenter();
+  }
+});
+
+// ── ACTIVITIES ────────────────────────────────────────────────────────────────
+function toggleAct(id){
+  const body = document.getElementById('body-'+id);
+  const btn = body.previousElementSibling.querySelector('.act-toggle');
+  const open = body.style.display==='none';
+  body.style.display = open?'block':'none';
+  btn.textContent = open?'▲':'▼';
+}
+function filterActs(cat,btn){
+  document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.act-card').forEach(card=>{
+    const show = cat==='all' || card.dataset.cat===cat;
+    const locked = card.dataset.locked==='true' && !settings.imggen;
+    card.style.display = show && !locked ? 'block' : 'none';
+  });
+}
+function applyActivityLocks(){
+  document.querySelectorAll('.act-card[data-locked="true"]').forEach(card=>{
+    card.style.display = settings.imggen ? 'block' : 'none';
+  });
+  if(settings.lockHw){
+    document.querySelectorAll('.act-card[data-cat="hardware"]').forEach(c=>c.style.display='none');
+  }
+  if(!settings.extLinks){
+    document.querySelectorAll('.act-link,.scratch-link,.ml-link').forEach(l=>l.style.display='none');
+  }
+}
+// Show Scratch/ML cards with external site notice but always visible
+document.querySelectorAll('.act-card[data-cat="scratch"],.act-card[data-cat="ml"]').forEach(card=>{
+  card.style.display='block';
+});
+
+// ── GAMES ─────────────────────────────────────────────────────────────────────
+function showGame(id){
+  document.querySelectorAll('.game-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('game-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+function initGames(){ hwRender(); aiRender(); bugRender(); }
+
+// Hardware Quiz
+function hwRender(){
+  if(hwIdx>=HW_QUIZ.length){document.getElementById('game-hw-quiz').innerHTML=`<div class="quiz-result"><h3>🏆 Score: ${hwScore}/${HW_QUIZ.length}</h3><p style="color:var(--muted)">Nice work!</p><button class="quiz-restart" onclick="hwIdx=0;hwScore=0;hwAnswered=false;initGames()">Play Again</button></div>`;return;}
+  const q=HW_QUIZ[hwIdx];
+  document.getElementById('hw-score').textContent=`Question ${hwIdx+1} of ${HW_QUIZ.length} — Score: ${hwScore}`;
+  document.getElementById('hw-q').textContent=q.q;
+  document.getElementById('hw-fb').textContent='';
+  document.getElementById('hw-next').style.display='none';
+  hwAnswered=false;
+  document.getElementById('hw-opts').innerHTML=q.opts.map((o,i)=>`<button class="quiz-opt" onclick="hwAnswer(${i})">${o}</button>`).join('');
+}
+function hwAnswer(i){
+  if(hwAnswered)return;hwAnswered=true;
+  const q=HW_QUIZ[hwIdx];const correct=i===q.a;
+  if(correct)hwScore++;
+  const opts=document.querySelectorAll('#hw-opts .quiz-opt');
+  opts[i].classList.add(correct?'correct':'wrong');
+  opts[q.a].classList.add('correct');
+  opts.forEach(o=>o.disabled=true);
+  document.getElementById('hw-fb').textContent=correct?'✅ Correct!':'❌ The correct answer is highlighted.';
+  document.getElementById('hw-fb').style.color=correct?'var(--green)':'var(--pink)';
+  document.getElementById('hw-next').style.display='inline-block';
+}
+function hwNext(){hwIdx++;hwRender();}
+
+// AI Quiz
+function aiRender(){
+  if(aiIdx>=AI_QUIZ.length){document.getElementById('game-ai-quiz').innerHTML=`<div class="quiz-result"><h3>🏆 Score: ${aiScore}/${AI_QUIZ.length}</h3><p style="color:var(--muted)">AI expert!</p><button class="quiz-restart" onclick="aiIdx=0;aiScore=0;aiAnswered=false;initGames()">Play Again</button></div>`;return;}
+  const q=AI_QUIZ[aiIdx];
+  document.getElementById('ai-score').textContent=`Question ${aiIdx+1} of ${AI_QUIZ.length} — Score: ${aiScore}`;
+  document.getElementById('ai-q').textContent=q.q;
+  document.getElementById('ai-fb').textContent='';
+  document.getElementById('ai-next').style.display='none';
+  aiAnswered=false;
+  document.getElementById('ai-opts').innerHTML=q.opts.map((o,i)=>`<button class="quiz-opt" onclick="aiAnswer(${i})">${o}</button>`).join('');
+}
+function aiAnswer(i){
+  if(aiAnswered)return;aiAnswered=true;
+  const q=AI_QUIZ[aiIdx];const correct=i===q.a;
+  if(correct)aiScore++;
+  const opts=document.querySelectorAll('#ai-opts .quiz-opt');
+  opts[i].classList.add(correct?'correct':'wrong');
+  opts[q.a].classList.add('correct');
+  opts.forEach(o=>o.disabled=true);
+  document.getElementById('ai-fb').textContent=correct?'✅ Correct!':'❌ The correct answer is highlighted.';
+  document.getElementById('ai-fb').style.color=correct?'var(--green)':'var(--pink)';
+  document.getElementById('ai-next').style.display='inline-block';
+}
+function aiNext(){aiIdx++;aiRender();}
+
+// Code Fix
+function bugRender(){
+  if(bugIdx>=BUGS.length) bugIdx=0;
+  const b=BUGS[bugIdx];
+  document.getElementById('bug-score').textContent=`Bug ${bugIdx+1} of ${BUGS.length}`;
+  document.getElementById('bug-title').textContent=b.title;
+  document.getElementById('bug-desc').textContent=b.desc;
+  document.getElementById('bug-hint').textContent='💡 Hint: '+b.hint;
+  document.getElementById('bug-hint').style.display='none';
+  document.getElementById('bug-bad').textContent=b.bad;
+  document.getElementById('bug-fixed').textContent=b.fixed;
+  document.getElementById('bug-fixed-box').style.display='none';
+}
+function showHint(){document.getElementById('bug-hint').style.display='block';}
+function revealFix(){document.getElementById('bug-fixed-box').style.display='block';}
+function nextBug(){bugIdx=(bugIdx+1)%BUGS.length;bugRender();}
+
+// ── BUILD LAB ─────────────────────────────────────────────────────────────────
+function setEditorTab(tab){
+  editorTab=tab;
+  ['html','css','js'].forEach(t=>document.getElementById('editor-'+t).style.display=t===tab?'block':'none');
+  document.querySelectorAll('.build-tab').forEach((b,i)=>b.classList.toggle('active',i===['html','css','js'].indexOf(tab)));
+}
+function runPreview(){
+  const html=document.getElementById('editor-html').value;
+  const css=document.getElementById('editor-css').value;
+  const js=document.getElementById('editor-js').value;
+  const combined=`<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+  document.getElementById('preview-frame').srcdoc=combined;
+}
+function clearEditor(){if(confirm('Clear all code?')){['html','css','js'].forEach(t=>document.getElementById('editor-'+t).value='');runPreview();}}
+function toggleAiPane(){
+  const pane=document.getElementById('ai-pane');
+  const main=document.getElementById('build-main');
+  const show=!pane.classList.contains('show');
+  pane.classList.toggle('show',show);
+  main.style.gridTemplateColumns=show?'1fr 1fr 1fr':'1fr 1fr';
+  if(show&&!buildAiHistory.length) addBuildMsg('ai','Hi! I can write or fix HTML, CSS, and JavaScript for you. Tell me what you want to build!');
+}
+function addBuildMsg(role,text){
+  const msgs=document.getElementById('build-ai-msgs');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;div.textContent=text;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  buildAiHistory.push({role:role==='user'?'user':'assistant',content:text});
+}
+async function sendBuildAI(){
+  const inp=document.getElementById('build-ai-input');
+  const text=inp.value.trim();if(!text)return;inp.value='';
+  const html=document.getElementById('editor-html').value;
+  const css=document.getElementById('editor-css').value;
+  const js=document.getElementById('editor-js').value;
+  const codeCtx=html||css||js?`\n\nStudent's current code:\nHTML: ${html}\nCSS: ${css}\nJS: ${js}`:'';
+  addBuildMsg('user',text);
+  const sys='You are a friendly coding tutor for REACT Camp students aged 13-18. Help them build web projects with HTML/CSS/JavaScript. Keep code simple. Add comments explaining each part. When giving code, clearly label HTML, CSS, and JS sections.';
+  try{
+    const r=await fetch('http://localhost:11434/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'llama3.2:3b',messages:[{role:'system',content:sys},...buildAiHistory.slice(-6),{role:'user',content:text+codeCtx}],stream:true})});
+    if(!r.ok)throw new Error('no ollama');
+    const msgs=document.getElementById('build-ai-msgs');
+    const div=document.createElement('div');div.className='ai-msg ai';msgs.appendChild(div);
+    let full='';
+    const reader=r.body.getReader();const dec=new TextDecoder();
+    while(true){const{done,value}=await reader.read();if(done)break;
+      for(const line of dec.decode(value).split('\n')){if(!line.trim())continue;try{const d=JSON.parse(line);if(d.message?.content){full+=d.message.content;div.textContent=full;msgs.scrollTop=msgs.scrollHeight;}}catch(e){}}
+    }
+    buildAiHistory.push({role:'assistant',content:full});
+  }catch(e){addBuildMsg('ai','⚠️ Local AI not connected. Make sure start-ollama.bat is running, then try again!');}
+}
+function loadBuildActivity(id){
+  const prompts={
+    html1:'Generate an HTML page with 5 fun facts about space. Include a big h1 headline, a numbered list of facts, and a footer paragraph. Add HTML comments explaining each section.',
+    css1:'Add CSS to my page: colorful gradient background (purple to dark blue), centered text, max-width 700px centered, comfortable padding, and an interesting font color for the headline. Explain each CSS property.',
+    anim1:'Add CSS animations: the background gradient cycles through 3 colors smoothly, and the headline fades in on page load. Explain how @keyframes works.',
+    js1:'For my HTML fact list: hide all facts by default. Add a button that says "Show a Fact". Each click shows a random fact from the list. Use simple JavaScript with a comment on every line.',
+    quiz:'Build a complete quiz game in one HTML file: 5 animal questions, 4 choices each, score counter, instant feedback (correct=green wrong=red), final score screen. Use style tags and script tags. Explain the code.',
+    pet:'Build a virtual pet game: the pet has Hunger and Happiness bars (HTML progress elements). Buttons: Feed, Play, Rest. Stats slowly decrease over time using setInterval. Include an emoji pet display.',
+    story:'Build a story generator: inputs for hero name, location, magical object, and villain. A Generate button combines them into a random adventure story using 3 different templates. Display the story in a styled box.',
+  };
+  if(prompts[id]){
+    if(!document.getElementById('ai-pane').classList.contains('show')) toggleAiPane();
+    document.getElementById('build-ai-input').value=prompts[id];
+    document.getElementById('build-ai-input').focus();
+  }
+}
+['editor-html','editor-css','editor-js'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',()=>{clearTimeout(el._t);el._t=setTimeout(runPreview,900);});
+});
+document.querySelectorAll('.code-editor').forEach(ed=>{
+  ed.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const s=ed.selectionStart;ed.value=ed.value.slice(0,s)+'  '+ed.value.slice(ed.selectionEnd);ed.selectionStart=ed.selectionEnd=s+2;}});
+});
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function checkPin(){
+  const v=document.getElementById('pin-entry').value;
+  if(v===settings.pin||v==='1234'){
+    pinUnlocked=true;
+    document.getElementById('teacher-controls').classList.add('show');
+    document.getElementById('pin-status').textContent='— unlocked ✓';
+    document.getElementById('pin-status').style.color='var(--green)';
+  }else{
+    document.getElementById('pin-entry').style.borderColor='var(--pink)';
+    setTimeout(()=>document.getElementById('pin-entry').style.borderColor='',1200);
+  }
+}
+function savePin(){const np=document.getElementById('new-pin').value;if(np.length>=4){settings.pin=np;localStorage.setItem('react-settings',JSON.stringify(settings));alert('PIN saved!');}}
+function saveSetting(key,val){settings[key]=val;localStorage.setItem('react-settings',JSON.stringify(settings));applyActivityLocks();}
+function loadSettings(){
+  document.getElementById('student-name-input').value=localStorage.getItem('react-student-name')||'';
+  document.getElementById('tog-imggen').checked=!!settings.imggen;
+  document.getElementById('tog-hw').checked=!!settings.lockHw;
+  document.getElementById('tog-links').checked=settings.extLinks!==false;
+  const days=['Open It Up','The Brains','Upgrade Lab','Power On','Demo Day'];
+  document.getElementById('progress-display').innerHTML=days.map((t,i)=>
+    `Day ${i+1}: ${t} — ${progress['day'+(i+1)]?'<span style="color:var(--green)">✓ Done</span>':'<span style="color:var(--muted)">Not marked</span>'}`
+  ).join('<br>');
+}
+function clearProgress(){if(confirm('Reset all progress?')){progress={};localStorage.setItem('react-progress','{}');loadSettings();}}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────────────────
+function exportProgress(){
+  const name = localStorage.getItem('react-student-name') || 'student';
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    studentName: name,
+    progress: JSON.parse(localStorage.getItem('react-progress') || '{}'),
+    hwScore: parseInt(localStorage.getItem('react-hw-score') || '0'),
+    aiScore: parseInt(localStorage.getItem('react-ai-score') || '0'),
+    settings: JSON.parse(localStorage.getItem('react-settings') || '{}'),
+  };
+  const json = JSON.stringify(data, null, 2);
+  const safeName = name.replace(/[^a-z0-9]/gi,'_').toLowerCase() || 'student';
+  const filename = `react_camp_${safeName}.json`;
+
+  // Try File System Access API (Chrome) — lets them pick their Drive folder
+  if (window.showSaveFilePicker) {
+    window.showSaveFilePicker({
+      suggestedName: filename,
+      types: [{ description: 'Progress File', accept: { 'application/json': ['.json'] } }]
+    }).then(handle => handle.createWritable())
+      .then(writable => writable.write(json).then(() => writable.close()))
+      .then(() => showSaveStatus('✅ Saved to your chosen folder!'))
+      .catch(e => { if (e.name !== 'AbortError') fallbackDownload(json, filename); });
+  } else {
+    // Fallback: regular download
+    fallbackDownload(json, filename);
+  }
+}
+
+function fallbackDownload(json, filename) {
+  const a = document.createElement('a');
+  a.href = 'data:application/json,' + encodeURIComponent(json);
+  a.download = filename;
+  a.click();
+  showSaveStatus('✅ Downloaded — move this file to your Google Drive folder.');
+}
+
+function importProgress(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version || !data.progress) throw new Error('Invalid file');
+      // Restore everything
+      if (data.studentName) {
+        localStorage.setItem('react-student-name', data.studentName);
+        document.getElementById('student-label').textContent = '👤 ' + data.studentName;
+        document.getElementById('student-name-input').value = data.studentName;
+      }
+      progress = data.progress;
+      localStorage.setItem('react-progress', JSON.stringify(progress));
+      if (data.settings) {
+        settings = {...settings, ...data.settings};
+        localStorage.setItem('react-settings', JSON.stringify(settings));
+      }
+      if (data.hwScore) localStorage.setItem('react-hw-score', data.hwScore);
+      if (data.aiScore) localStorage.setItem('react-ai-score', data.aiScore);
+      loadSettings();
+      showSaveStatus('✅ Progress restored for ' + (data.studentName || 'student') + '! Exported: ' + new Date(data.exportedAt).toLocaleDateString());
+    } catch(err) {
+      showSaveStatus('❌ Could not read file — make sure it\'s a REACT Camp progress file.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // reset so same file can be re-imported
+}
+
+function showSaveStatus(msg) {
+  const el = document.getElementById('save-status');
+  if (el) { el.textContent = msg; setTimeout(() => el.textContent = '', 5000); }
+}
+function saveName(){const n=document.getElementById('student-name-input').value;localStorage.setItem('react-student-name',n);document.getElementById('student-label').textContent=n?'👤 '+n:'👤 Set name';}
+function promptName(){const n=prompt('Your name:',localStorage.getItem('react-student-name')||'');if(n!==null){localStorage.setItem('react-student-name',n);document.getElementById('student-label').textContent=n?'👤 '+n:'👤 Set name';}}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+(function init(){
+  const name=localStorage.getItem('react-student-name');
+  if(name) document.getElementById('student-label').textContent='👤 '+name;
+  Object.keys(progress).forEach(key=>{
+    const btn=document.getElementById('dbtn-'+key.replace('day',''));
+    if(btn&&!btn.querySelector('.done-mark')){const m=document.createElement('span');m.className='done-mark';m.textContent=' ✓';m.style.color='var(--green)';btn.appendChild(m);}
+  });
+  applyActivityLocks();
+  selectDay(1);
+  hwRender();aiRender();bugRender();
+})();
+</script>
+</body>
+</html>
