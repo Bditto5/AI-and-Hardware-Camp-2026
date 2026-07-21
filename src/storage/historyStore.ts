@@ -24,6 +24,13 @@ const PREVIEW_MAX_CHARS = 120;
 const LEGACY_MIGRATION_MARKER_KEY = "educatorllm-iep-migration-done";
 const MAX_SAVED_FILES = 50;
 
+export interface HistoryBackupData {
+  sessionSummaries: SessionSummary[];
+  sessionBodies: SessionRecord[];
+  projects: Project[];
+  savedFiles: SavedFile[];
+}
+
 interface HistoryDBSchema extends DBSchema {
   sessionSummaries: { key: string; value: SessionSummary };
   sessionBodies: { key: string; value: SessionRecord };
@@ -476,4 +483,40 @@ export async function saveFileToLibrary(input: { fileName: string; text: string;
 export async function deleteSavedFile(id: string): Promise<void> {
   const db = await getDb();
   await db.delete("savedFiles", id);
+}
+
+export async function exportHistoryData(): Promise<HistoryBackupData> {
+  const db = await getDb();
+  const [sessionSummaries, sessionBodies, projects, savedFiles] = await Promise.all([
+    db.getAll("sessionSummaries"),
+    db.getAll("sessionBodies"),
+    db.getAll("projects"),
+    db.getAll("savedFiles"),
+  ]);
+  return { sessionSummaries, sessionBodies, projects, savedFiles };
+}
+
+export async function clearHistoryData(): Promise<void> {
+  for (const timer of pendingSaves.values()) clearTimeout(timer);
+  pendingSaves.clear();
+  const db = await getDb();
+  const tx = db.transaction(["sessionSummaries", "sessionBodies", "projects", "savedFiles"], "readwrite");
+  await Promise.all([
+    tx.objectStore("sessionSummaries").clear(),
+    tx.objectStore("sessionBodies").clear(),
+    tx.objectStore("projects").clear(),
+    tx.objectStore("savedFiles").clear(),
+  ]);
+  await tx.done;
+}
+
+export async function restoreHistoryData(data: HistoryBackupData): Promise<void> {
+  await clearHistoryData();
+  const db = await getDb();
+  const tx = db.transaction(["sessionSummaries", "sessionBodies", "projects", "savedFiles"], "readwrite");
+  for (const item of data.sessionSummaries) await tx.objectStore("sessionSummaries").put(item);
+  for (const item of data.sessionBodies) await tx.objectStore("sessionBodies").put(item);
+  for (const item of data.projects) await tx.objectStore("projects").put(item);
+  for (const item of data.savedFiles) await tx.objectStore("savedFiles").put(item);
+  await tx.done;
 }

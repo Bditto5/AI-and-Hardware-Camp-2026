@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — Teacher controls, backup, and restore
+
+- Added a PIN-gated Teacher Hub with first-use access code `2026`.
+- Added live totals for completed days, activities, saved AI chats, and Build Lab projects.
+- Added teacher availability switches for AI Lab, Build Lab, and the original Full Camp link.
+- Added a versioned JSON backup containing camp progress, scores, chat history, attachments, projects, snapshots, and local settings.
+- Added validated restore with backup-date preview and explicit replacement confirmation.
+- Added selective resets for progress, chats, Build Lab projects, or all local camp data.
+- Added teacher access-code changes stored only on the current computer.
+
 ## 0.3.0 — Native activities and Build Lab
 
 - Added twelve searchable, filterable camp activities with locally saved completion state.

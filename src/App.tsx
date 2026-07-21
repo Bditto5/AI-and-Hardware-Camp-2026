@@ -5,6 +5,7 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { GamesPanel } from "./components/GamesPanel";
 import { ActivitiesPanel } from "./components/ActivitiesPanel";
 import { BuildLab } from "./components/BuildLab";
+import { TeacherPanel } from "./components/TeacherPanel";
 import { checkConnection } from "./api/ollama";
 import { initHistoryStore } from "./storage/historyStore";
 import type { SessionSummary } from "./storage/types";
@@ -17,8 +18,9 @@ import {
   saveLastSlide,
   type CampProgress,
 } from "./storage/campProgressStore";
+import { loadTeacherSettings, type TeacherSettings } from "./storage/teacherStore";
 
-type View = "home" | "learn" | "activities" | "build" | "games" | "ai" | "history" | "settings" | "legacy";
+type View = "home" | "learn" | "activities" | "build" | "games" | "ai" | "history" | "teacher" | "settings" | "legacy";
 
 const CAMP_PROMPT: Prompt = {
   id: "react-camp-ai-coach",
@@ -71,6 +73,7 @@ function App() {
   const [aiPrompt, setAiPrompt] = useState<Prompt>(CAMP_PROMPT);
   const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>();
   const [aiLaunchId, setAiLaunchId] = useState("general");
+  const [teacherSettings, setTeacherSettings] = useState<TeacherSettings>(() => loadTeacherSettings());
 
   useEffect(() => {
     void initHistoryStore().then(() => setHistoryReady(true));
@@ -101,6 +104,10 @@ function App() {
   );
 
   function navigate(next: View) {
+    if ((next === "ai" && !teacherSettings.aiEnabled) || (next === "build" && !teacherSettings.buildEnabled)) {
+      setView("teacher");
+      return;
+    }
     if (next !== "ai") setResumeSessionId(undefined);
     setView(next);
   }
@@ -149,6 +156,10 @@ function App() {
 
   function resumeSession(summary: SessionSummary) {
     if (summary.type !== "chat") return;
+    if (!teacherSettings.aiEnabled) {
+      setView("teacher");
+      return;
+    }
     setResumeSessionId(summary.id);
     setAiPrompt(CAMP_PROMPT);
     setAiInitialMessage(undefined);
@@ -170,6 +181,7 @@ function App() {
           <button className={view === "games" ? "active" : ""} onClick={() => navigate("games")}>Games</button>
           <button className={view === "ai" ? "active" : ""} onClick={openGeneralAI}>AI Lab</button>
           <button className={view === "history" ? "active" : ""} onClick={() => navigate("history")}>History</button>
+          <button className={view === "teacher" ? "active" : ""} onClick={() => navigate("teacher")}>Teacher</button>
           <button className={view === "settings" ? "active" : ""} onClick={() => navigate("settings")} aria-label="Settings">⚙</button>
         </nav>
         <div className={`ollama-pill ollama-${ollamaState}`} title={ollamaMessage}>
@@ -214,7 +226,7 @@ function App() {
               <span>03</span><h2>Camp Games</h2><p>Hardware quiz, AI quiz, and a five-part debugging challenge with saved best scores.</p><button>Play games →</button>
             </article>
           </section>
-          <button className="legacy-callout" onClick={() => navigate("legacy")}><strong>Need the original camp?</strong><span>Open the preserved Full Camp with its remaining legacy modules.</span><b>Open Full Camp →</b></button>
+          {teacherSettings.showLegacyCamp && <button className="legacy-callout" onClick={() => navigate("legacy")}><strong>Need the original camp?</strong><span>Open the preserved Full Camp with its remaining legacy modules.</span><b>Open Full Camp →</b></button>}
         </main>
       )}
 
@@ -284,6 +296,8 @@ function App() {
           {historyReady ? <HistoryPanel onBack={() => navigate("home")} onResumeSession={resumeSession} /> : <p className="loading-card">Loading local history…</p>}
         </main>
       )}
+
+      {view === "teacher" && <main className="camp-page"><TeacherPanel onSettingsChanged={setTeacherSettings} /></main>}
 
       {view === "settings" && <main className="camp-page embedded-feature"><SettingsPanel onDone={() => navigate("home")} /></main>}
 
