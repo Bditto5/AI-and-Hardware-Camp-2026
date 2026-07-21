@@ -41,3 +41,10 @@ export function markDayComplete(day: number): void {
   if (!progress.completedDays.includes(day)) progress.completedDays.push(day);
   save({ ...progress, completedDays: [...progress.completedDays].sort((a, b) => a - b) });
 }
+
+export function getNextIncompleteDay(progress: CampProgress, totalDays = 5): number {
+  for (let day = 1; day <= totalDays; day += 1) {
+    if (!progress.completedDays.includes(day)) return day;
+  }
+  return totalDays;
+}
