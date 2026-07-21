@@ -3,6 +3,8 @@ import { ChatPanel } from "./components/ChatPanel";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { GamesPanel } from "./components/GamesPanel";
+import { ActivitiesPanel } from "./components/ActivitiesPanel";
+import { BuildLab } from "./components/BuildLab";
 import { checkConnection } from "./api/ollama";
 import { initHistoryStore } from "./storage/historyStore";
 import type { SessionSummary } from "./storage/types";
@@ -16,7 +18,7 @@ import {
   type CampProgress,
 } from "./storage/campProgressStore";
 
-type View = "home" | "learn" | "games" | "ai" | "history" | "settings" | "legacy";
+type View = "home" | "learn" | "activities" | "build" | "games" | "ai" | "history" | "settings" | "legacy";
 
 const CAMP_PROMPT: Prompt = {
   id: "react-camp-ai-coach",
@@ -33,6 +35,26 @@ Never claim to have feelings or certainty you do not have. Remind students to ve
 For hardware work, put safety first: unplug equipment, discharge static, avoid force, and ask an instructor when unsure.
 The AI is running locally through Ollama on this computer.`;
 
+const CODE_COACH_PROMPT: Prompt = {
+  id: "react-camp-code-coach",
+  title: "REACT Camp Code Coach",
+  description: "A local coach for student HTML, CSS, and JavaScript projects.",
+  category: "engagement",
+  template: "Describe what you expected, what happened, and the smallest change you want to make.",
+};
+
+const ACTIVITY_COACH_PROMPT: Prompt = {
+  id: "react-camp-activity-coach",
+  title: "REACT Camp Activity Coach",
+  description: "Hints and teach-back questions for camp activities.",
+  category: "engagement",
+  template: "Tell me which activity you are doing and where you are stuck.",
+};
+
+const CODE_COACH_PREAMBLE = `${CAMP_PREAMBLE}
+You are now the code coach. Prefer diagnosis, questions, and one small testable change at a time.
+Do not claim to run the code. Never provide code that accesses the network, local files, browser storage, popups, or the host application.`;
+
 function App() {
   const [view, setView] = useState<View>("home");
   const [progress, setProgress] = useState<CampProgress>(() => loadCampProgress());
@@ -46,6 +68,9 @@ function App() {
   const [historyReady, setHistoryReady] = useState(false);
   const [ollamaState, setOllamaState] = useState<"checking" | "ready" | "error">("checking");
   const [ollamaMessage, setOllamaMessage] = useState("Checking local AI…");
+  const [aiPrompt, setAiPrompt] = useState<Prompt>(CAMP_PROMPT);
+  const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>();
+  const [aiLaunchId, setAiLaunchId] = useState("general");
 
   useEffect(() => {
     void initHistoryStore().then(() => setHistoryReady(true));
@@ -80,6 +105,27 @@ function App() {
     setView(next);
   }
 
+  function openGeneralAI() {
+    setAiPrompt(CAMP_PROMPT);
+    setAiInitialMessage(undefined);
+    setAiLaunchId(`general-${Date.now()}`);
+    navigate("ai");
+  }
+
+  function openActivityCoach(message: string) {
+    setAiPrompt(ACTIVITY_COACH_PROMPT);
+    setAiInitialMessage(message);
+    setAiLaunchId(`activity-${Date.now()}`);
+    navigate("ai");
+  }
+
+  function openCodeCoach(message: string) {
+    setAiPrompt(CODE_COACH_PROMPT);
+    setAiInitialMessage(message);
+    setAiLaunchId(`code-${Date.now()}`);
+    navigate("ai");
+  }
+
   function goToSlide(nextIndex: number) {
     if (!currentDay) return;
     const bounded = Math.max(0, Math.min(currentDay.slides.length - 1, nextIndex));
@@ -104,6 +150,8 @@ function App() {
   function resumeSession(summary: SessionSummary) {
     if (summary.type !== "chat") return;
     setResumeSessionId(summary.id);
+    setAiPrompt(CAMP_PROMPT);
+    setAiInitialMessage(undefined);
     setView("ai");
   }
 
@@ -117,10 +165,11 @@ function App() {
         <nav aria-label="Main navigation">
           <button className={view === "home" ? "active" : ""} onClick={() => navigate("home")}>Home</button>
           <button className={view === "learn" ? "active" : ""} onClick={() => navigate("learn")}>Learn</button>
+          <button className={view === "activities" ? "active" : ""} onClick={() => navigate("activities")}>Activities</button>
+          <button className={view === "build" ? "active" : ""} onClick={() => navigate("build")}>Build</button>
           <button className={view === "games" ? "active" : ""} onClick={() => navigate("games")}>Games</button>
-          <button className={view === "ai" ? "active" : ""} onClick={() => navigate("ai")}>AI Lab</button>
+          <button className={view === "ai" ? "active" : ""} onClick={openGeneralAI}>AI Lab</button>
           <button className={view === "history" ? "active" : ""} onClick={() => navigate("history")}>History</button>
-          <button className={view === "legacy" ? "active" : ""} onClick={() => navigate("legacy")}>Full Camp</button>
           <button className={view === "settings" ? "active" : ""} onClick={() => navigate("settings")} aria-label="Settings">⚙</button>
         </nav>
         <div className={`ollama-pill ollama-${ollamaState}`} title={ollamaMessage}>
@@ -139,7 +188,7 @@ function App() {
                 <button className="camp-primary" onClick={() => { selectDay(nextIncompleteDay); navigate("learn"); }}>
                   {progress.completedDays.length === campDays.length ? "Review the camp" : `Continue Day ${nextIncompleteDay}`} →
                 </button>
-                <button className="camp-secondary" onClick={() => navigate("ai")}>Ask the AI Coach</button>
+                <button className="camp-secondary" onClick={openGeneralAI}>Ask the AI Coach</button>
               </div>
             </div>
             <div className="hardware-orbit" aria-hidden="true">
@@ -158,13 +207,14 @@ function App() {
             <article className="feature-card green" onClick={() => navigate("learn")}>
               <span>05</span><h2>Complete learning arc</h2><p>All five days are available with saved slide and day progress.</p><button>Open lessons →</button>
             </article>
-            <article className="feature-card purple" onClick={() => navigate("ai")}>
+            <article className="feature-card purple" onClick={openGeneralAI}>
               <span>AI</span><h2>AI Lab</h2><p>Ask questions, improve prompts, attach a document, and keep every conversation.</p><button>Open AI Lab →</button>
             </article>
             <article className="feature-card pink" onClick={() => navigate("games")}>
               <span>03</span><h2>Camp Games</h2><p>Hardware quiz, AI quiz, and a five-part debugging challenge with saved best scores.</p><button>Play games →</button>
             </article>
           </section>
+          <button className="legacy-callout" onClick={() => navigate("legacy")}><strong>Need the original camp?</strong><span>Open the preserved Full Camp with its remaining legacy modules.</span><b>Open Full Camp →</b></button>
         </main>
       )}
 
@@ -212,17 +262,22 @@ function App() {
       {view === "ai" && (
         <main className="camp-page embedded-feature">
           <ChatPanel
-            key={resumeSessionId ?? "new-camp-chat"}
-            prompt={CAMP_PROMPT}
+            key={resumeSessionId ?? aiLaunchId}
+            prompt={aiPrompt}
             onBack={() => navigate("home")}
             surface="assistant"
-            messagePreamble={CAMP_PREAMBLE}
+            initialMessage={resumeSessionId ? undefined : aiInitialMessage}
+            messagePreamble={aiPrompt.id === CODE_COACH_PROMPT.id ? CODE_COACH_PREAMBLE : CAMP_PREAMBLE}
             resumeSessionId={resumeSessionId}
           />
         </main>
       )}
 
       {view === "games" && <main className="camp-page"><GamesPanel /></main>}
+
+      {view === "activities" && <main className="camp-page"><ActivitiesPanel onCoach={openActivityCoach} onBuild={() => navigate("build")} /></main>}
+
+      {view === "build" && <main className="camp-page"><BuildLab onAskCoach={openCodeCoach} /></main>}
 
       {view === "history" && (
         <main className="camp-page embedded-feature">

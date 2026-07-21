@@ -4,12 +4,15 @@ A Windows desktop program for a five-day hands-on camp teaching students ages 13
 
 The application runs its AI through [Ollama](https://ollama.com/) on the same computer. After Ollama and a model are installed, ordinary camp use is offline and prompts remain on the machine.
 
-## Current build: v0.2 curriculum and games
+## Current build: v0.3 activities and Build Lab
 
 - Native Windows shell built with Tauri v2.
 - REACT Camp dashboard and visual identity.
 - All five camp days with 42 structured lesson slides and durable per-day progress.
 - Native Hardware Quiz, AI Quiz, and Bug Hunt with explanations and saved best scores.
+- Twelve native hardware, AI, and build activities with filters, safety notes, steps, and completion tracking.
+- Native Build Lab with named HTML/CSS/JavaScript projects, local autosave, safe preview, starter templates, snapshots, and HTML export.
+- Local Ollama code coach that reviews the current project without changing code automatically.
 - Local Ollama AI Coach.
 - Persistent chat history through IndexedDB.
 - Search, pin, rename, group, resume, and delete history.
@@ -62,7 +65,7 @@ Installer output is written under `src-tauri/target/release/bundle/`.
 
 ## Roadmap
 
-See [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md). The Windows shell, local AI, persistence, five-day curriculum, games, and release pipeline are now native. Activities and the Build Lab remain available in the preserved Full Camp while their React versions are developed.
+See [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md). The Windows shell, local AI, persistence, five-day curriculum, games, activities, Build Lab, and release pipeline are now native. The preserved Full Camp remains available for comparison and remaining teacher controls.
 
 ## Privacy
 

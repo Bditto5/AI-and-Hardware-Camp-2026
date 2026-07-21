@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — Native activities and Build Lab
+
+- Added twelve searchable, filterable camp activities with locally saved completion state.
+- Added safety callouts, step-by-step instructions, activity coaching prompts, and Build Lab shortcuts.
+- Added named HTML/CSS/JavaScript projects with 500 ms local autosave.
+- Added three starter projects: Profile Card, Mini Quiz, and Branching Story.
+- Added a sandboxed live preview with network, navigation, form, object, and host access blocked.
+- Added manual recovery snapshots, one-file HTML export, and project switching.
+- Added a local Ollama code-coach path that receives the current code but cannot modify it automatically.
+
 ## 0.2.0 — Five-day curriculum and native games
 
 - Migrated all five camp days into structured React lessons with 42 total slides.
