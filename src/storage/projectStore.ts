@@ -93,6 +93,5 @@ export function buildPreviewDocument(project: Pick<CodeProject, "html" | "css" |
 <html><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<style>${project.css}</style></head><body>${project.html}<script>${safeScript}<\/script></body></html>`;
+<style>${project.css}</style></head><body>${project.html}<script>${safeScript}</script></body></html>`;
 }
-
