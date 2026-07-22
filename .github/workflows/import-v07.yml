@@ -1,0 +1,52 @@
+name: Import and build REACT Camp v0.7
+
+on:
+  push:
+    paths:
+      - "react-camp-source-v0.7.0.zip"
+
+permissions:
+  contents: write
+
+jobs:
+  import-and-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unpack the phase 7 source
+        shell: pwsh
+        run: |
+          Expand-Archive -LiteralPath react-camp-source-v0.7.0.zip -DestinationPath . -Force
+          Remove-Item -LiteralPath react-camp-source-v0.7.0.zip
+          git restore --source=HEAD -- .github/workflows/build.yml .github/workflows/release.yml .github/workflows/import-v07.yml
+
+      - name: Commit phase 7
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Improve accessibility and responsive layouts"
+          git push
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Verify phase 7 source
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+
+      - name: Build Windows installers
+        run: npm run tauri build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: react-camp-v0.7.0-windows-installer
+          path: src-tauri/target/release/bundle/
