@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPanel } from "./components/ChatPanel";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
@@ -75,6 +75,8 @@ function App() {
   const [aiLaunchId, setAiLaunchId] = useState("general");
   const [teacherSettings, setTeacherSettings] = useState<TeacherSettings>(() => loadTeacherSettings());
   const [presenterMode, setPresenterMode] = useState(false);
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const isInitialView = useRef(true);
 
   useEffect(() => {
     void initHistoryStore().then(() => setHistoryReady(true));
@@ -88,6 +90,14 @@ function App() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (isInitialView.current) {
+      isInitialView.current = false;
+      return;
+    }
+    window.requestAnimationFrame(() => mainContentRef.current?.focus());
+  }, [view]);
 
   const currentDay = campDays[selectedDay - 1];
   const currentSlide = currentDay?.slides[slideIndex];
@@ -206,26 +216,29 @@ function App() {
 
   return (
     <div className="camp-app">
+      <a className="skip-link" href="#camp-main-content">Skip to main content</a>
       <header className="camp-topbar">
         <button className="camp-brand" onClick={() => navigate("home")}>
           <span className="camp-bolt">⚡</span>
           <span><strong>REACT Camp</strong><small>AI + Hardware</small></span>
         </button>
         <nav aria-label="Main navigation">
-          <button className={view === "home" ? "active" : ""} onClick={() => navigate("home")}>Home</button>
-          <button className={view === "learn" ? "active" : ""} onClick={() => navigate("learn")}>Learn</button>
-          <button className={view === "activities" ? "active" : ""} onClick={() => navigate("activities")}>Activities</button>
-          <button className={view === "build" ? "active" : ""} onClick={() => navigate("build")}>Build</button>
-          <button className={view === "games" ? "active" : ""} onClick={() => navigate("games")}>Games</button>
-          <button className={view === "ai" ? "active" : ""} onClick={openGeneralAI}>AI Lab</button>
-          <button className={view === "history" ? "active" : ""} onClick={() => navigate("history")}>History</button>
-          <button className={view === "teacher" ? "active" : ""} onClick={() => navigate("teacher")}>Teacher</button>
+          <button className={view === "home" ? "active" : ""} aria-current={view === "home" ? "page" : undefined} onClick={() => navigate("home")}>Home</button>
+          <button className={view === "learn" ? "active" : ""} aria-current={view === "learn" ? "page" : undefined} onClick={() => navigate("learn")}>Learn</button>
+          <button className={view === "activities" ? "active" : ""} aria-current={view === "activities" ? "page" : undefined} onClick={() => navigate("activities")}>Activities</button>
+          <button className={view === "build" ? "active" : ""} aria-current={view === "build" ? "page" : undefined} onClick={() => navigate("build")}>Build</button>
+          <button className={view === "games" ? "active" : ""} aria-current={view === "games" ? "page" : undefined} onClick={() => navigate("games")}>Games</button>
+          <button className={view === "ai" ? "active" : ""} aria-current={view === "ai" ? "page" : undefined} onClick={openGeneralAI}>AI Lab</button>
+          <button className={view === "history" ? "active" : ""} aria-current={view === "history" ? "page" : undefined} onClick={() => navigate("history")}>History</button>
+          <button className={view === "teacher" ? "active" : ""} aria-current={view === "teacher" ? "page" : undefined} onClick={() => navigate("teacher")}>Teacher</button>
           <button className={view === "settings" ? "active" : ""} onClick={() => navigate("settings")} aria-label="Settings">⚙</button>
         </nav>
-        <div className={`ollama-pill ollama-${ollamaState}`} title={ollamaMessage}>
+        <div className={`ollama-pill ollama-${ollamaState}`} title={ollamaMessage} role="status" aria-live="polite">
           <span /> {ollamaState === "ready" ? "AI ready" : ollamaState === "checking" ? "Checking AI" : "AI setup"}
         </div>
       </header>
+
+      <div id="camp-main-content" ref={mainContentRef} tabIndex={-1}>
 
       {view === "home" && (
         <main className="camp-page camp-home">
@@ -254,14 +267,14 @@ function App() {
           </section>
 
           <section className="camp-grid">
-            <article className="feature-card green" onClick={() => navigate("learn")}>
-              <span>05</span><h2>Complete learning arc</h2><p>All five days are available with saved slide and day progress.</p><button>Open lessons →</button>
+            <article className="feature-card green">
+              <span>05</span><h2>Complete learning arc</h2><p>All five days are available with saved slide and day progress.</p><button onClick={() => navigate("learn")}>Open lessons →</button>
             </article>
-            <article className="feature-card purple" onClick={openGeneralAI}>
-              <span>AI</span><h2>AI Lab</h2><p>Ask questions, improve prompts, attach a document, and keep every conversation.</p><button>Open AI Lab →</button>
+            <article className="feature-card purple">
+              <span>AI</span><h2>AI Lab</h2><p>Ask questions, improve prompts, attach a document, and keep every conversation.</p><button onClick={openGeneralAI}>Open AI Lab →</button>
             </article>
-            <article className="feature-card pink" onClick={() => navigate("games")}>
-              <span>03</span><h2>Camp Games</h2><p>Hardware quiz, AI quiz, and a five-part debugging challenge with saved best scores.</p><button>Play games →</button>
+            <article className="feature-card pink">
+              <span>03</span><h2>Camp Games</h2><p>Hardware quiz, AI quiz, and a five-part debugging challenge with saved best scores.</p><button onClick={() => navigate("games")}>Play games →</button>
             </article>
           </section>
           {teacherSettings.showLegacyCamp && <button className="legacy-callout" onClick={() => navigate("legacy")}><strong>Need the original camp?</strong><span>Open the preserved Full Camp with its remaining legacy modules.</span><b>Open Full Camp →</b></button>}
@@ -276,6 +289,7 @@ function App() {
               <button
                 key={day.number}
                 className={`${selectedDay === day.number ? "active" : ""} ${progress.completedDays.includes(day.number) ? "complete" : ""}`}
+                aria-current={selectedDay === day.number ? "step" : undefined}
                 onClick={() => selectDay(day.number)}
               >
                 <span>DAY {day.number}</span>{day.title}
@@ -284,11 +298,12 @@ function App() {
             ))}
           </aside>
           <section className="lesson-stage">
+            <p className="visually-hidden">Use Left Arrow or Page Up for the previous slide. Use Right Arrow or Page Down for the next slide.</p>
             <header>
               <div><p className="camp-eyebrow">DAY {currentDay.number} · {currentDay.title.toUpperCase()}</p><h1>{currentSlide.title}</h1></div>
-              <div className="lesson-header-actions"><strong>{slideIndex + 1} / {currentDay.slides.length}</strong><button className="camp-secondary presenter-toggle" onClick={togglePresenterMode}>{presenterMode ? "Exit presenter" : "Presenter mode"}</button></div>
+              <div className="lesson-header-actions"><strong>{slideIndex + 1} / {currentDay.slides.length}</strong><button className="camp-secondary presenter-toggle" aria-pressed={presenterMode} onClick={togglePresenterMode}>{presenterMode ? "Exit presenter" : "Presenter mode"}</button></div>
             </header>
-            <div className={`lesson-slide tone-${currentSlide.tone}`}>
+            <div className={`lesson-slide tone-${currentSlide.tone}`} aria-live="polite" aria-atomic="true">
               {currentSlide.icon && <div className="slide-icon">{currentSlide.icon}</div>}
               {currentSlide.kicker && <p className="slide-kicker">{currentSlide.kicker}</p>}
               <h2>{currentSlide.heading}</h2>
@@ -298,7 +313,7 @@ function App() {
             </div>
             <footer className="lesson-controls">
               <button className="camp-secondary" onClick={() => goToSlide(slideIndex - 1)} disabled={slideIndex === 0}>← Previous</button>
-              <div className="slide-dots">{slideDots.map((dot, index) => <button key={dot.id} className={`${dot.active ? "active" : ""} ${dot.visited ? "visited" : ""}`} onClick={() => goToSlide(index)} aria-label={`Go to slide ${index + 1}`} />)}</div>
+              <div className="slide-dots">{slideDots.map((dot, index) => <button key={dot.id} className={`${dot.active ? "active" : ""} ${dot.visited ? "visited" : ""}`} aria-current={dot.active ? "step" : undefined} onClick={() => goToSlide(index)} aria-label={`Go to slide ${index + 1}`} />)}</div>
               {slideIndex < currentDay.slides.length - 1 ? (
                 <button className="camp-primary" onClick={() => goToSlide(slideIndex + 1)}>Next →</button>
               ) : (
@@ -345,6 +360,7 @@ function App() {
           <iframe title="Complete REACT Camp curriculum" src="/legacy/curriculum.html" sandbox="allow-scripts allow-forms allow-downloads" />
         </main>
       )}
+      </div>
     </div>
   );
 }

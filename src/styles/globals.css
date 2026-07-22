@@ -1329,8 +1329,9 @@ body {
 .code-suggestion-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .code-suggestion-actions .danger-link { color: #ff9ab8; }
 .code-suggestion-files { display: flex; gap: 8px; margin: 16px 0 10px; }
-.code-suggestion-files label { display: flex; align-items: center; gap: 4px; padding: 4px 8px; border: 1px solid var(--camp-border); border-radius: 9px; background: #111725; }
-.code-suggestion-files label.active { border-color: var(--camp-purple); box-shadow: 0 0 0 1px rgba(118, 108, 255, .3); }
+.code-suggestion-files > div { display: flex; align-items: center; gap: 5px; padding: 4px 8px; border: 1px solid var(--camp-border); border-radius: 9px; background: #111725; }
+.code-suggestion-files > div.active { border-color: var(--camp-purple); box-shadow: 0 0 0 1px rgba(118, 108, 255, .3); }
+.code-suggestion-files label { color: var(--camp-muted); font-size: .68rem; font-weight: 800; }
 .code-suggestion-files button { border: 0; background: transparent; color: white; font-weight: 900; }
 .code-suggestion-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .code-suggestion-compare label { display: flex; min-width: 0; flex-direction: column; gap: 6px; color: var(--camp-muted); font-size: .75rem; font-weight: 900; text-transform: uppercase; }
@@ -1341,6 +1342,86 @@ body {
   .code-suggestion-panel > header { flex-direction: column; }
   .code-suggestion-actions { justify-content: flex-start; }
   .code-suggestion-compare { grid-template-columns: 1fr; }
+}
+
+/* v0.7 accessibility and responsive desktop QA */
+.skip-link {
+  position: fixed;
+  left: 14px;
+  top: -80px;
+  z-index: 1000;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: white;
+  color: #161a27;
+  font-weight: 900;
+}
+.skip-link:focus { top: 12px; }
+#camp-main-content:focus { outline: none; }
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--camp-yellow, #ffc857);
+  outline-offset: 3px;
+}
+.feature-card { cursor: default; }
+.feature-card button { width: 100%; min-height: 44px; text-align: left; }
+.activity-summary { min-height: 78px; }
+.slide-dots button { min-width: 12px; min-height: 12px; }
+
+@media (max-width: 1080px) {
+  body { min-width: 0; }
+  .camp-topbar { height: auto; min-height: 68px; flex-wrap: wrap; padding-top: 8px; }
+  .camp-topbar nav { order: 3; width: 100%; height: 48px; margin-left: 0; overflow-x: auto; overflow-y: hidden; }
+  .camp-topbar nav button { flex: 0 0 auto; min-width: 72px; }
+  .camp-page { min-height: calc(100vh - 116px); }
+  .camp-home { padding: 34px 24px 50px; }
+  .lesson-layout:not(.presenter-mode) { grid-template-columns: 1fr; }
+  .lesson-layout:not(.presenter-mode) .lesson-sidebar { display: flex; gap: 8px; padding: 10px 14px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--camp-border); }
+  .lesson-layout:not(.presenter-mode) .lesson-sidebar .camp-eyebrow { display: none; }
+  .lesson-layout:not(.presenter-mode) .lesson-sidebar button { min-width: 180px; margin: 0; }
+  .lesson-stage { padding: 24px; }
+  .build-heading { align-items: flex-start; flex-direction: column; }
+  .build-project-controls { width: 100%; flex-wrap: wrap; }
+  .build-project-controls input { width: min(280px, 100%); }
+  .template-strip { flex-wrap: wrap; }
+  .template-strip .danger-link { margin-left: 0; }
+  .build-workspace { height: auto; grid-template-columns: 1fr; }
+  .editor-panel, .preview-panel { min-height: 430px; }
+  .build-tools-row { grid-template-columns: 1fr; }
+  .snapshot-panel > header { flex-direction: column; }
+  .activities-heading, .activity-toolbar { align-items: flex-start; flex-direction: column; }
+  .activity-toolbar input { width: 100%; }
+  .activity-filters { flex-wrap: wrap; }
+}
+
+@media (max-width: 700px) {
+  .camp-home, .lesson-stage, .build-lab-page, .embedded-feature { padding-left: 14px; padding-right: 14px; }
+  .camp-grid, .component-grid { grid-template-columns: 1fr; }
+  .status-strip { grid-template-columns: 1fr 1fr; }
+  .status-strip .status-message { grid-column: 1 / -1; }
+  .lesson-stage > header { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .lesson-controls { grid-template-columns: 1fr 1fr; }
+  .lesson-controls .slide-dots { grid-column: 1 / -1; grid-row: 1; overflow-x: auto; }
+  .activity-details { padding-left: 18px; }
+  .activity-category { width: 44px; flex-basis: 44px; }
+  .chat-input-row { align-items: stretch; flex-direction: column; }
+  .chat-input-actions { flex-wrap: wrap; }
+  .code-suggestion-files { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .camp-primary, .camp-secondary, .feature-card, .native-activity, .quiz-card, .bug-card, .code-suggestion-panel {
+    border: 1px solid ButtonText;
+  }
+  .camp-topbar nav button.active, .game-tabs button.active { outline: 2px solid Highlight; }
 }
 
 @media print {

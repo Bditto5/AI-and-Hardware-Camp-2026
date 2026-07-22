@@ -339,10 +339,11 @@ ${project.javascript}`;
           </header>
           <div className="code-suggestion-files">
             {changedSuggestionTargets(project, suggestion).map((target) => (
-              <label key={target} className={reviewTab === target ? "active" : ""}>
-                <input type="checkbox" checked={suggestionTargets.includes(target)} onChange={() => toggleSuggestionTarget(target)} />
-                <button type="button" onClick={() => setReviewTab(target)}>{target === "javascript" ? "JavaScript" : target.toUpperCase()}</button>
-              </label>
+              <div key={target} className={reviewTab === target ? "active" : ""}>
+                <input id={`include-suggestion-${target}`} type="checkbox" checked={suggestionTargets.includes(target)} onChange={() => toggleSuggestionTarget(target)} />
+                <label htmlFor={`include-suggestion-${target}`}>Include</label>
+                <button type="button" aria-pressed={reviewTab === target} onClick={() => setReviewTab(target)}>{target === "javascript" ? "JavaScript" : target.toUpperCase()}</button>
+              </div>
             ))}
           </div>
           <div className="code-suggestion-compare">

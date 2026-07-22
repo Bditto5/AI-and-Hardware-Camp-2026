@@ -4,7 +4,7 @@ A Windows desktop program for a five-day hands-on camp teaching students ages 13
 
 The application runs its AI through [Ollama](https://ollama.com/) on the same computer. After Ollama and a model are installed, ordinary camp use is offline and prompts remain on the machine.
 
-## Current build: v0.6 safe AI-assisted building
+## Current build: v0.7 accessible classroom experience
 
 - Native Windows shell built with Tauri v2.
 - REACT Camp dashboard and visual identity.
@@ -14,6 +14,7 @@ The application runs its AI through [Ollama](https://ollama.com/) on the same co
 - Native Build Lab with named HTML/CSS/JavaScript projects, local autosave, safe preview, starter templates, snapshots, and HTML export.
 - Portable Build Lab project import/export, project duplication, protected snapshot restore, and snapshot cleanup.
 - Structured local-AI code suggestions with side-by-side review, per-file selection, safe preview, and recovery snapshot before apply.
+- Skip navigation, visible keyboard focus, announced live feedback, reduced-motion support, and responsive lesson/Build Lab layouts.
 - Full-screen lesson presenter mode with large classroom type and keyboard navigation.
 - PIN-gated Teacher Hub with live progress, activity, chat, and project totals.
 - Teacher controls for AI Lab, Build Lab, and the preserved Full Camp link.

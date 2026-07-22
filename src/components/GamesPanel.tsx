@@ -79,7 +79,7 @@ function QuizGame({ title, questions, scoreKey, onScores }: { title: string; que
           return <button key={option} className={status} onClick={() => answer(optionIndex)} disabled={selected !== null}><span>{String.fromCharCode(65 + optionIndex)}</span>{option}</button>;
         })}
       </div>
-      {selected !== null && <div className={`quiz-feedback ${selected === question.answer ? "correct" : "wrong"}`}><strong>{selected === question.answer ? "Correct" : "Not quite"}</strong><p>{question.explanation}</p><button className="camp-primary" onClick={next}>{index === questions.length - 1 ? "See score" : "Next question"}</button></div>}
+      {selected !== null && <div className={`quiz-feedback ${selected === question.answer ? "correct" : "wrong"}`} role="status" aria-live="polite"><strong>{selected === question.answer ? "Correct" : "Not quite"}</strong><p>{question.explanation}</p><button className="camp-primary" onClick={next}>{index === questions.length - 1 ? "See score" : "Next question"}</button></div>}
     </section>
   );
 }
@@ -106,7 +106,7 @@ function BugHunt({ onScores }: { onScores: (scores: ScoreRecord) => void }) {
         <div><strong>{revealed ? "Original" : "Find the bug"}</strong><pre>{challenge.bad}</pre></div>
         {revealed && <div className="fixed"><strong>One correction</strong><pre>{challenge.fixed}</pre></div>}
       </div>
-      {hint && !revealed && <p className="bug-hint"><strong>Hint:</strong> {challenge.hint}</p>}
+      {hint && !revealed && <p className="bug-hint" role="status"><strong>Hint:</strong> {challenge.hint}</p>}
       <div className="game-actions">
         {!revealed && <button className="camp-secondary" onClick={() => setHint(true)}>Show hint</button>}
         {!revealed ? <button className="camp-primary" onClick={() => setRevealed(true)}>Reveal correction</button> : <button className="camp-primary" onClick={next}>Next bug</button>}
@@ -122,9 +122,9 @@ export function GamesPanel() {
     <div className="games-page">
       <header className="games-heading"><div><p className="camp-eyebrow">PRACTICE + RETRY</p><h1>Camp Games</h1><p>Check your understanding and learn from every answer.</p></div><div className="score-summary"><span>Best hardware <strong>{scores.hardware}/10</strong></span><span>Best AI <strong>{scores.ai}/10</strong></span><span>Bugs completed <strong>{scores.bugs}/5</strong></span></div></header>
       <nav className="game-tabs" aria-label="Choose a camp game">
-        <button className={game === "hardware" ? "active" : ""} onClick={() => setGame("hardware")}>Hardware Quiz</button>
-        <button className={game === "ai" ? "active" : ""} onClick={() => setGame("ai")}>AI Quiz</button>
-        <button className={game === "bugs" ? "active" : ""} onClick={() => setGame("bugs")}>Bug Hunt</button>
+        <button aria-pressed={game === "hardware"} className={game === "hardware" ? "active" : ""} onClick={() => setGame("hardware")}>Hardware Quiz</button>
+        <button aria-pressed={game === "ai"} className={game === "ai" ? "active" : ""} onClick={() => setGame("ai")}>AI Quiz</button>
+        <button aria-pressed={game === "bugs"} className={game === "bugs" ? "active" : ""} onClick={() => setGame("bugs")}>Bug Hunt</button>
       </nav>
       {game === "hardware" && <QuizGame key="hardware" title="Hardware Quiz" questions={hardwareQuiz} scoreKey="hardware" onScores={setScores} />}
       {game === "ai" && <QuizGame key="ai" title="AI Quiz" questions={aiQuiz} scoreKey="ai" onScores={setScores} />}

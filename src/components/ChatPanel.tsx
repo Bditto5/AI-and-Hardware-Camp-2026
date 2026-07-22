@@ -322,10 +322,10 @@ function ChatPanelBody({
       {connectionState === "checking" && <Spinner label="Checking Ollama connection…" />}
 
       {connectionState === "error" && (
-        <div className="connection-banner connection-banner-error">{connectionMessage}</div>
+        <div className="connection-banner connection-banner-error" role="alert">{connectionMessage}</div>
       )}
 
-      <div className="chat-messages">
+      <div className="chat-messages" role="log" aria-live="polite" aria-relevant="additions text">
         {messages.map((msg) => (
           <div key={msg.id} className={`chat-message chat-message-${msg.role}`}>
             {msg.role === "assistant" && msg.text ? (
@@ -407,7 +407,7 @@ function ChatPanelBody({
           <div className="attachment-hint">
             Google Doc? Use File → Download → Microsoft Word (.docx), then attach it here.
           </div>
-          {attachmentError && <div className="attachment-error">{attachmentError}</div>}
+          {attachmentError && <div className="attachment-error" role="alert">{attachmentError}</div>}
           {showLibraryPicker && (
             <div className="chat-library-picker">
               {libraryFiles.length === 0 ? (

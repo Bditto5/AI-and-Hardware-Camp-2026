@@ -46,7 +46,7 @@ export function ActivitiesPanel({ onCoach, onBuild }: ActivitiesPanelProps) {
       </header>
       <div className="activity-toolbar">
         <div className="activity-filters">
-          {(["all", "hardware", "ai", "build"] as const).map((category) => <button key={category} className={filter === category ? "active" : ""} onClick={() => setFilter(category)}>{category === "all" ? "All" : category === "ai" ? "AI" : category[0].toUpperCase() + category.slice(1)}</button>)}
+          {(["all", "hardware", "ai", "build"] as const).map((category) => <button key={category} className={filter === category ? "active" : ""} aria-pressed={filter === category} onClick={() => setFilter(category)}>{category === "all" ? "All" : category === "ai" ? "AI" : category[0].toUpperCase() + category.slice(1)}</button>)}
         </div>
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search activities" aria-label="Search activities" />
       </div>
@@ -56,13 +56,13 @@ export function ActivitiesPanel({ onCoach, onBuild }: ActivitiesPanelProps) {
           const isComplete = completed.includes(activity.id);
           return (
             <article key={activity.id} className={`native-activity ${isExpanded ? "expanded" : ""} ${isComplete ? "complete" : ""}`}>
-              <button className="activity-summary" onClick={() => setExpanded(isExpanded ? null : activity.id)}>
+              <button className="activity-summary" aria-expanded={isExpanded} aria-controls={`activity-details-${activity.id}`} onClick={() => setExpanded(isExpanded ? null : activity.id)}>
                 <span className={`activity-category ${activity.category}`}>{activity.category === "hardware" ? "HW" : activity.category === "ai" ? "AI" : "CODE"}</span>
                 <span className="activity-title"><strong>{activity.title}</strong><small>{activity.difficulty} · {activity.duration}</small></span>
                 <span className="activity-state">{isComplete ? "Complete ✓" : isExpanded ? "Close" : "Open"}</span>
               </button>
               {isExpanded && (
-                <div className="activity-details">
+                <div className="activity-details" id={`activity-details-${activity.id}`}>
                   <p className="activity-description">{activity.description}</p>
                   {activity.safety && <p className="activity-safety"><strong>Safety:</strong> {activity.safety}</p>}
                   <ol>{activity.steps.map((step) => <li key={step}>{step}</li>)}</ol>
@@ -81,4 +81,3 @@ export function ActivitiesPanel({ onCoach, onBuild }: ActivitiesPanelProps) {
     </div>
   );
 }
-

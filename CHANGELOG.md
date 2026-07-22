@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0 — Accessibility and responsive classroom QA
+
+- Added a skip-to-content link and automatic main-content focus after navigation.
+- Added current-page, current-day, current-slide, expanded-state, and pressed-state semantics.
+- Added highly visible keyboard focus across interactive controls.
+- Added screen-reader announcements for Ollama status, quiz feedback, activity details, chat errors, and Build Lab feedback.
+- Removed nested and pointer-only interactions from dashboard cards and AI suggestion selectors.
+- Added reduced-motion behavior and Windows forced-colors support.
+- Added responsive navigation, lesson, Build Lab, activity, game, and chat layouts for narrower windows.
+- Added hidden lesson keyboard instructions for Left/Right Arrow and Page Up/Page Down controls.
+
 ## 0.6.0 — Safe AI code suggestions
 
 - Added direct, structured Build Lab suggestions from the local Ollama code coach.
