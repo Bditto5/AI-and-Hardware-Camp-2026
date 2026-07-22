@@ -18,6 +18,20 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - name: Validate classroom setup script
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            "deployment/Setup-REACT-Camp.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          )
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
 
   windows-build:
     runs-on: windows-latest
@@ -31,7 +45,22 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
       - run: npm run tauri build
+      - name: Assemble classroom setup package
+        shell: pwsh
+        run: |
+          $package = "classroom-package"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          $installer = Get-ChildItem "src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
+          if (-not $installer) { throw "The NSIS installer was not produced." }
+          Copy-Item $installer.FullName "$package/REACT-Camp-Setup.exe"
+          Copy-Item "deployment/Setup-REACT-Camp.cmd" $package
+          Copy-Item "deployment/Setup-REACT-Camp.ps1" $package
+          Copy-Item "deployment/CLASSROOM-SETUP.txt" $package
       - uses: actions/upload-artifact@v4
         with:
           name: react-camp-windows-installer
           path: src-tauri/target/release/bundle/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: react-camp-classroom-setup
+          path: classroom-package/

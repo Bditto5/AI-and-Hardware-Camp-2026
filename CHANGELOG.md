@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0 — Classroom deployment release
+
+- Added a one-click classroom setup package for repeatable Windows laptop deployment.
+- Added guided installation and verification for REACT Camp, Ollama, and the lightweight `llama3.2:1b` model.
+- Added an optional reusable Ollama installer path for USB drives and school file shares.
+- Added native Stop support for local AI responses while preserving partial generated text.
+- Added debounced partial-response persistence and serialized history writes for interruption recovery.
+- Aligned fresh-install app settings with the model installed by the classroom setup package.
+- Added CI validation and release packaging for the classroom deployment ZIP.
+- Updated backup metadata and Windows package versions to 2.0.0.
+
 ## 0.7.0 — Accessibility and responsive classroom QA
 
 - Added a skip-to-content link and automatic main-content focus after navigation.

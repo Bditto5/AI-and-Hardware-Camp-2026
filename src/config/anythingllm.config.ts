@@ -24,7 +24,7 @@ function readEnv(value: string | undefined, fallback: string): string {
 /** Build-time defaults from .env — used in dev, empty in packaged builds. */
 export const envDefaults: OllamaSettings = {
   baseUrl: readEnv(import.meta.env.VITE_OLLAMA_BASE_URL, "http://localhost:11434"),
-  model: readEnv(import.meta.env.VITE_OLLAMA_MODEL, "phi4-mini:latest"),
+  model: readEnv(import.meta.env.VITE_OLLAMA_MODEL, "llama3.2:1b"),
 };
 
 /** Loads saved settings, falling back to .env defaults per field. */
