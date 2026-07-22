@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { sendChat, type ChatRequestMessage, type OllamaErrorKind } from "../api/ollama";
 import type { SessionAttachmentMeta } from "../storage/types";
 
@@ -26,6 +26,8 @@ interface UseChatOptions {
   initialState?: UseChatInitialState;
   /** Fired after each completed turn (success or error) with the full updated transcript — lets a caller persist without useChat knowing about storage. */
   onTurnComplete?: (messages: ChatMessage[], outgoingHistory: ChatRequestMessage[]) => void;
+  /** Debounced snapshots while a response streams, so interrupted answers survive app closure. */
+  onTurnProgress?: (messages: ChatMessage[], outgoingHistory: ChatRequestMessage[]) => void;
 }
 
 function newId(): string {
@@ -39,6 +41,11 @@ export function useChat(options?: UseChatOptions) {
   const outgoingHistoryRef = useRef<ChatRequestMessage[]>(options?.initialState?.outgoingHistory ?? []);
   const onTurnCompleteRef = useRef(options?.onTurnComplete);
   onTurnCompleteRef.current = options?.onTurnComplete;
+  const onTurnProgressRef = useRef(options?.onTurnProgress);
+  onTurnProgressRef.current = options?.onTurnProgress;
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestProgressRef = useRef<ChatMessage[] | null>(null);
 
   // Authoritative synchronous copy of the transcript. React 18 batches state
   // updates even inside async functions, so a value captured via a
@@ -62,6 +69,21 @@ export function useChat(options?: UseChatOptions) {
     return next;
   }, []);
 
+  const flushProgress = useCallback(() => {
+    if (progressTimerRef.current !== null) {
+      clearTimeout(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    const latest = latestProgressRef.current;
+    latestProgressRef.current = null;
+    if (latest) onTurnProgressRef.current?.(latest, outgoingHistoryRef.current);
+  }, []);
+
+  useEffect(() => () => {
+    abortControllerRef.current?.abort();
+    flushProgress();
+  }, [flushProgress]);
+
   const sendMessage = useCallback(async (text: string, sendOptions?: SendMessageOptions) => {
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
@@ -78,6 +100,8 @@ export function useChat(options?: UseChatOptions) {
     };
     appendMessage(userMessage);
     setIsSending(true);
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     const conversation: ChatRequestMessage[] = [
       ...outgoingHistoryRef.current,
@@ -93,10 +117,17 @@ export function useChat(options?: UseChatOptions) {
     });
 
     const result = await sendChat(conversation, {
+      signal: abortController.signal,
       onChunk: (_chunk, fullText) => {
-        updateMessage(assistantMessageId, { role: "assistant", text: fullText });
+        const next = updateMessage(assistantMessageId, { role: "assistant", text: fullText });
+        latestProgressRef.current = next;
+        if (progressTimerRef.current === null) {
+          progressTimerRef.current = setTimeout(flushProgress, 500);
+        }
       },
     });
+    abortControllerRef.current = null;
+    flushProgress();
     outgoingHistoryRef.current = conversation;
 
     let finalMessages: ChatMessage[];
@@ -107,6 +138,17 @@ export function useChat(options?: UseChatOptions) {
         { role: "assistant", content: result.value },
       ];
       finalMessages = updateMessage(assistantMessageId, { role: "assistant", text: result.value });
+    } else if (result.error === "stopped") {
+      const partial = messagesRef.current.find((message) => message.id === assistantMessageId)?.text ?? "";
+      if (partial) {
+        outgoingHistoryRef.current = [
+          ...outgoingHistoryRef.current,
+          { role: "assistant", content: partial },
+        ];
+        finalMessages = messagesRef.current;
+      } else {
+        finalMessages = updateMessage(assistantMessageId, { role: "error", text: result.message });
+      }
     } else {
       setLastErrorKind(result.error);
       finalMessages = updateMessage(assistantMessageId, { role: "error", text: result.message });
@@ -114,7 +156,11 @@ export function useChat(options?: UseChatOptions) {
 
     setIsSending(false);
     onTurnCompleteRef.current?.(finalMessages, outgoingHistoryRef.current);
-  }, [isSending, appendMessage, updateMessage]);
+  }, [isSending, appendMessage, updateMessage, flushProgress]);
+
+  const stop = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   const reset = useCallback(() => {
     messagesRef.current = [];
@@ -123,5 +169,5 @@ export function useChat(options?: UseChatOptions) {
     outgoingHistoryRef.current = [];
   }, []);
 
-  return { messages, isSending, lastErrorKind, sendMessage, reset };
+  return { messages, isSending, lastErrorKind, sendMessage, stop, reset };
 }

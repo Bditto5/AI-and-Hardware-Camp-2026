@@ -1,9 +1,47 @@
 use futures_util::StreamExt;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::Emitter;
+use tokio_util::sync::CancellationToken;
+
+#[derive(Default)]
+struct OllamaRequestManager(Mutex<HashMap<String, CancellationToken>>);
+
+impl OllamaRequestManager {
+    fn register(&self, request_id: &str) -> Result<CancellationToken, String> {
+        let token = CancellationToken::new();
+        self.0
+            .lock()
+            .map_err(|_| "Couldn't lock the Ollama request manager.".to_string())?
+            .insert(request_id.to_string(), token.clone());
+        Ok(token)
+    }
+
+    fn cancel(&self, request_id: &str) -> Result<bool, String> {
+        let token = self
+            .0
+            .lock()
+            .map_err(|_| "Couldn't lock the Ollama request manager.".to_string())?
+            .get(request_id)
+            .cloned();
+        if let Some(token) = token {
+            token.cancel();
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    fn remove(&self, request_id: &str) {
+        if let Ok(mut requests) = self.0.lock() {
+            requests.remove(request_id);
+        }
+    }
+}
 
 #[derive(Clone, Serialize)]
 struct DownloadProgressPayload {
@@ -25,11 +63,30 @@ async fn stream_ollama_lines(
     event_name: &str,
     request_id: String,
     response: reqwest::Response,
+    cancellation: CancellationToken,
 ) -> Result<(), String> {
     let mut stream = response.bytes_stream();
     let mut buffer = String::new();
 
-    while let Some(next) = stream.next().await {
+    loop {
+        let next = tokio::select! {
+            _ = cancellation.cancelled() => {
+                window
+                    .emit(
+                        event_name,
+                        OllamaStreamPayload {
+                            request_id,
+                            line: None,
+                            done: true,
+                            error: Some("STOPPED".to_string()),
+                        },
+                    )
+                    .map_err(|err| format!("Couldn't emit Ollama cancellation: {err}"))?;
+                return Ok(());
+            }
+            next = stream.next() => next,
+        };
+        let Some(next) = next else { break };
         let chunk = next.map_err(|err| format!("Ollama stream failed: {err}"))?;
         let text = String::from_utf8_lossy(&chunk);
         buffer.push_str(&text);
@@ -117,6 +174,7 @@ async fn ollama_get_json(url: String) -> Result<String, String> {
 #[tauri::command]
 async fn ollama_chat_stream(
     window: tauri::Window,
+    manager: tauri::State<'_, OllamaRequestManager>,
     url: String,
     body_json: String,
     request_id: String,
@@ -137,12 +195,23 @@ async fn ollama_chat_stream(
         return Err(response_error_message(status, &body));
     }
 
-    stream_ollama_lines(window, "ollama-chat-stream", request_id, response).await
+    let cancellation = manager.register(&request_id)?;
+    let result = stream_ollama_lines(
+        window,
+        "ollama-chat-stream",
+        request_id.clone(),
+        response,
+        cancellation,
+    )
+    .await;
+    manager.remove(&request_id);
+    result
 }
 
 #[tauri::command]
 async fn ollama_pull_stream(
     window: tauri::Window,
+    manager: tauri::State<'_, OllamaRequestManager>,
     url: String,
     body_json: String,
     request_id: String,
@@ -163,7 +232,25 @@ async fn ollama_pull_stream(
         return Err(response_error_message(status, &body));
     }
 
-    stream_ollama_lines(window, "ollama-pull-stream", request_id, response).await
+    let cancellation = manager.register(&request_id)?;
+    let result = stream_ollama_lines(
+        window,
+        "ollama-pull-stream",
+        request_id.clone(),
+        response,
+        cancellation,
+    )
+    .await;
+    manager.remove(&request_id);
+    result
+}
+
+#[tauri::command]
+fn ollama_cancel_request(
+    manager: tauri::State<'_, OllamaRequestManager>,
+    request_id: String,
+) -> Result<bool, String> {
+    manager.cancel(&request_id)
 }
 
 #[tauri::command]
@@ -232,6 +319,7 @@ fn launch_ollama_installer(path: String) -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .manage(OllamaRequestManager::default())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
@@ -240,6 +328,7 @@ pub fn run() {
             ollama_get_json,
             ollama_chat_stream,
             ollama_pull_stream,
+            ollama_cancel_request,
             download_ollama_installer,
             launch_ollama_installer
         ])
