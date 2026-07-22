@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 — Safe AI code suggestions
+
+- Added direct, structured Build Lab suggestions from the local Ollama code coach.
+- Added side-by-side current and proposed code review for HTML, CSS, and JavaScript.
+- Added per-file selection so students decide exactly which proposed files to apply.
+- Added safe preview of selected AI changes without modifying saved project code.
+- Added strict parsing that prevents malformed coach responses from changing a project.
+- Added an automatic `Before AI suggestion` recovery snapshot before applying any AI change.
+- Preserved the full-chat path for explanations and longer coaching conversations.
+
 ## 0.5.0 — Presenter mode and portable Build Lab projects
 
 - Added full-screen lesson presenter mode with enlarged classroom typography.

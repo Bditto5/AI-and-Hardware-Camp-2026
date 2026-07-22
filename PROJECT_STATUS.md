@@ -1,6 +1,6 @@
 # Project status — REACT Camp AI + Hardware
 
-Last updated: 2026-07-21 while preparing v0.5.0.
+Last updated: 2026-07-22 while preparing v0.6.0.
 
 ## Repository
 
@@ -25,6 +25,8 @@ Rust, IndexedDB, and a locally running Ollama model.
 - PIN-gated Teacher Hub with feature availability, complete backup/restore, and
   selective reset
 - full-screen lesson presenter mode with keyboard navigation
+- structured local-AI code suggestions with side-by-side review, file selection,
+  preview-before-apply, and automatic recovery snapshots
 - permanent GitHub Actions Windows build and release workflows
 
 ## Local source layout
@@ -45,7 +47,6 @@ GitHub web interface.
 ## Next useful milestones
 
 - real installed-app acceptance test with Ollama and restart/resume
-- structured AI code suggestions with review-before-apply
 - accessibility and responsive-layout audit
 - tagged Windows release with checksums
 - optional image backend that never blocks normal camp use

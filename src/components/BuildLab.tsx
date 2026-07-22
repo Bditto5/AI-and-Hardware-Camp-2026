@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { sendChat } from "../api/ollama";
 import { buildTemplates } from "../content/buildTemplates";
 import {
   buildPreviewDocument,
@@ -13,6 +14,13 @@ import {
   type CodeProject,
   type CodeSnapshot,
 } from "../storage/projectStore";
+import {
+  applyCodeSuggestion,
+  changedSuggestionTargets,
+  parseCodeSuggestion,
+  type CodeSuggestion,
+  type CodeSuggestionTarget,
+} from "../utils/codeSuggestion";
 
 type EditorTab = "html" | "css" | "javascript";
 
@@ -39,6 +47,11 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
   const [snapshotName, setSnapshotName] = useState("");
   const [coachQuestion, setCoachQuestion] = useState("Help me improve this project. First explain one issue or opportunity, then give one small change to try.");
   const [projectMessage, setProjectMessage] = useState("");
+  const [coachState, setCoachState] = useState<"idle" | "asking" | "ready" | "error">("idle");
+  const [coachError, setCoachError] = useState("");
+  const [suggestion, setSuggestion] = useState<CodeSuggestion | null>(null);
+  const [suggestionTargets, setSuggestionTargets] = useState<CodeSuggestionTarget[]>([]);
+  const [reviewTab, setReviewTab] = useState<CodeSuggestionTarget>("html");
 
   useEffect(() => {
     setSaveState("saving");
@@ -168,6 +181,90 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
     onAskCoach(message.slice(0, 24_000));
   }
 
+  async function requestCodeSuggestion() {
+    const question = coachQuestion.trim();
+    if (!question || coachState === "asking") return;
+    setCoachState("asking");
+    setCoachError("");
+    setSuggestion(null);
+    setSuggestionTargets([]);
+
+    const instruction = `You are a safe beginner HTML/CSS/JavaScript code coach for students ages 13-18.
+Review the project below and make one small, testable improvement that answers the student's request.
+Do not add network requests, external assets, local file access, browser storage, popups, downloads, or navigation.
+Return ONLY one valid JSON object. Do not put it in a Markdown code fence.
+Use this exact shape:
+{"summary":"short title","explanation":"what changed and why","html":"complete replacement HTML or omit","css":"complete replacement CSS or omit","javascript":"complete replacement JavaScript or omit"}
+Include only files that need to change, but each included value must contain the complete replacement file.
+
+Student request: ${question}
+
+Project name: ${project.name}
+
+HTML:
+${project.html}
+
+CSS:
+${project.css}
+
+JavaScript:
+${project.javascript}`;
+
+    const result = await sendChat([{ role: "user", content: instruction.slice(0, 24_000) }]);
+    if (!result.ok) {
+      setCoachState("error");
+      setCoachError(result.message);
+      return;
+    }
+
+    try {
+      const parsed = parseCodeSuggestion(result.value);
+      const changed = changedSuggestionTargets(project, parsed);
+      if (changed.length === 0) throw new Error("The coach did not propose a code change. Try a more specific request.");
+      setSuggestion(parsed);
+      setSuggestionTargets(changed);
+      setReviewTab(changed[0]);
+      setCoachState("ready");
+    } catch (error) {
+      setCoachState("error");
+      setCoachError(error instanceof Error ? error.message : "The suggestion could not be reviewed safely.");
+    }
+  }
+
+  function toggleSuggestionTarget(target: CodeSuggestionTarget) {
+    setSuggestionTargets((current) => current.includes(target)
+      ? current.filter((item) => item !== target)
+      : [...current, target]);
+  }
+
+  function previewSuggestion() {
+    if (!suggestion) return;
+    const proposed = applyCodeSuggestion(project, suggestion, suggestionTargets);
+    setPreview(buildPreviewDocument(proposed));
+    setProjectMessage("Showing the selected AI changes in the safe preview. Your saved code has not changed.");
+  }
+
+  function applySuggestion() {
+    if (!suggestion || suggestionTargets.length === 0) return;
+    const protectedProject = withSnapshot(project, "Before AI suggestion");
+    const next = applyCodeSuggestion(protectedProject, suggestion, suggestionTargets);
+    setProject(next);
+    setPreview(buildPreviewDocument(next));
+    setSuggestion(null);
+    setSuggestionTargets([]);
+    setCoachState("idle");
+    setProjectMessage("AI suggestion applied. Your previous code is saved as Before AI suggestion.");
+  }
+
+  function discardSuggestion() {
+    setSuggestion(null);
+    setSuggestionTargets([]);
+    setCoachState("idle");
+    setCoachError("");
+    setPreview(buildPreviewDocument(project));
+    setProjectMessage("AI suggestion discarded. Your project was not changed.");
+  }
+
   const editorValue = project[tab];
 
   return (
@@ -220,11 +317,41 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
         </section>
         <section className="code-coach-panel">
           <h2>Local AI code coach</h2>
-          <p>The coach receives the current HTML, CSS, and JavaScript when you ask. It cannot change your project automatically.</p>
+          <p>Ask for a reviewable change, preview it safely, then choose which files to apply. Nothing changes automatically.</p>
           <textarea value={coachQuestion} onChange={(event) => setCoachQuestion(event.target.value)} aria-label="Question for code coach" />
-          <button className="camp-primary" onClick={askCoach} disabled={!coachQuestion.trim()}>Ask with current code</button>
+          <div className="code-coach-actions">
+            <button className="camp-primary" onClick={() => void requestCodeSuggestion()} disabled={!coachQuestion.trim() || coachState === "asking"}>{coachState === "asking" ? "Reviewing locallyâ€¦" : "Get reviewable change"}</button>
+            <button className="camp-secondary" onClick={askCoach} disabled={!coachQuestion.trim() || coachState === "asking"}>Open full chat</button>
+          </div>
+          {coachError && <p className="code-coach-error" role="alert">{coachError}</p>}
         </section>
       </div>
+
+      {suggestion && (
+        <section className="code-suggestion-panel" aria-label="AI code suggestion review">
+          <header>
+            <div><p className="camp-eyebrow">REVIEW BEFORE APPLY</p><h2>{suggestion.summary}</h2><p>{suggestion.explanation}</p></div>
+            <div className="code-suggestion-actions">
+              <button className="camp-secondary" onClick={previewSuggestion} disabled={suggestionTargets.length === 0}>Preview selected</button>
+              <button className="camp-primary" onClick={applySuggestion} disabled={suggestionTargets.length === 0}>Apply selected</button>
+              <button className="danger-link" onClick={discardSuggestion}>Discard</button>
+            </div>
+          </header>
+          <div className="code-suggestion-files">
+            {changedSuggestionTargets(project, suggestion).map((target) => (
+              <label key={target} className={reviewTab === target ? "active" : ""}>
+                <input type="checkbox" checked={suggestionTargets.includes(target)} onChange={() => toggleSuggestionTarget(target)} />
+                <button type="button" onClick={() => setReviewTab(target)}>{target === "javascript" ? "JavaScript" : target.toUpperCase()}</button>
+              </label>
+            ))}
+          </div>
+          <div className="code-suggestion-compare">
+            <label><span>Current {reviewTab}</span><textarea readOnly value={project[reviewTab]} /></label>
+            <label><span>Proposed {reviewTab}</span><textarea readOnly value={suggestion[reviewTab] ?? project[reviewTab]} /></label>
+          </div>
+          <p className="code-suggestion-safety">Applying creates a “Before AI suggestion” recovery snapshot first. Always test the result and be ready to explain what changed.</p>
+        </section>
+      )}
     </div>
   );
 }

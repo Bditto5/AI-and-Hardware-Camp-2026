@@ -1319,6 +1319,30 @@ body {
   .template-strip .danger-link { margin-left: 0; }
 }
 
+/* v0.6 safe AI code suggestion review */
+.code-coach-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.code-coach-error { margin-top: 10px !important; padding: 9px 11px; border-left: 3px solid var(--camp-pink); background: rgba(255, 110, 158, .08); color: #ffc1d5 !important; }
+.code-suggestion-panel { margin-top: 12px; padding: 18px; border: 1px solid rgba(118, 108, 255, .65); border-radius: 14px; background: linear-gradient(145deg, rgba(118, 108, 255, .12), rgba(26, 32, 51, .96)); }
+.code-suggestion-panel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.code-suggestion-panel h2 { margin: 2px 0 5px; }
+.code-suggestion-panel header p:not(.camp-eyebrow) { margin: 0; color: var(--camp-muted); line-height: 1.5; }
+.code-suggestion-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.code-suggestion-actions .danger-link { color: #ff9ab8; }
+.code-suggestion-files { display: flex; gap: 8px; margin: 16px 0 10px; }
+.code-suggestion-files label { display: flex; align-items: center; gap: 4px; padding: 4px 8px; border: 1px solid var(--camp-border); border-radius: 9px; background: #111725; }
+.code-suggestion-files label.active { border-color: var(--camp-purple); box-shadow: 0 0 0 1px rgba(118, 108, 255, .3); }
+.code-suggestion-files button { border: 0; background: transparent; color: white; font-weight: 900; }
+.code-suggestion-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.code-suggestion-compare label { display: flex; min-width: 0; flex-direction: column; gap: 6px; color: var(--camp-muted); font-size: .75rem; font-weight: 900; text-transform: uppercase; }
+.code-suggestion-compare textarea { width: 100%; min-height: 230px; resize: vertical; padding: 13px; border: 1px solid var(--camp-border); border-radius: 9px; background: #090d16; color: #dfe4f7; font: 500 .8rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; text-transform: none; }
+.code-suggestion-safety { margin: 10px 0 0; color: #c9f6d8; font-size: .76rem; }
+
+@media (max-width: 900px) {
+  .code-suggestion-panel > header { flex-direction: column; }
+  .code-suggestion-actions { justify-content: flex-start; }
+  .code-suggestion-compare { grid-template-columns: 1fr; }
+}
+
 @media print {
   body {
     background: white;
