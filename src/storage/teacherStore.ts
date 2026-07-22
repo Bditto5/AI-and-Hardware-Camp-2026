@@ -80,7 +80,7 @@ export async function createCampBackup(): Promise<CampBackupBundle> {
     format: "react-camp-backup",
     schemaVersion: 1,
     createdAt: new Date().toISOString(),
-    appVersion: "0.4.0",
+    appVersion: "2.0.0",
     localStorage: values,
     history: await exportHistoryData(),
   };

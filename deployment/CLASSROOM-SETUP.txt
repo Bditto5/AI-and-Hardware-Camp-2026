@@ -1,0 +1,36 @@
+REACT CAMP - CLASSROOM SETUP
+============================
+
+Internet setup (easiest)
+------------------------
+1. Keep every file in this folder together.
+2. Double-click Setup-REACT-Camp.cmd.
+3. If Windows asks whether to run the file, choose Run anyway.
+4. Complete the Ollama installer if it appears.
+5. Leave the laptop connected to power and internet while the AI model downloads.
+6. Wait for the green READY message.
+
+The default model is llama3.2:1b, selected for lighter classroom computers.
+
+Preparing one reusable USB folder
+---------------------------------
+The setup launcher normally downloads Ollama separately on every laptop.
+To avoid downloading the Ollama installer 25 times:
+
+1. Download OllamaSetup.exe from https://ollama.com/download/windows
+2. Put OllamaSetup.exe in this folder beside Setup-REACT-Camp.cmd.
+3. Copy the complete folder to a USB drive or school file share.
+
+The AI model is still downloaded on each laptop. Plan time and internet bandwidth
+for that step. Running several laptops at a time is safer than starting all 25 at once.
+
+Requirements
+------------
+- Windows 10 22H2 or newer, or Windows 11
+- Approximately 7 GB free disk space for the app, Ollama, and the light model
+- Internet access for Ollama/model downloads
+- The same Windows student account that will run REACT Camp should run setup
+
+Rerunning setup is safe. It repairs/reinstalls the app and skips Ollama installation
+when Ollama is already present.
+

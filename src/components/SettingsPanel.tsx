@@ -106,7 +106,7 @@ export function SettingsPanel({ onDone }: SettingsPanelProps) {
   async function handleSaveAndTest() {
     saveSettings({
       baseUrl: baseUrl.trim() || "http://localhost:11434",
-      model: model.trim() || "phi4-mini:latest",
+      model: model.trim() || "llama3.2:1b",
     });
     setTestState({ kind: "testing" });
     const result = await checkConnection();
@@ -269,7 +269,7 @@ export function SettingsPanel({ onDone }: SettingsPanelProps) {
               type="text"
               value={model}
               onChange={(e) => setModel(e.currentTarget.value)}
-              placeholder="phi4-mini:latest"
+              placeholder="llama3.2:1b"
               disabled={isDownloadInProgress}
             />
           )}

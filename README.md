@@ -4,7 +4,7 @@ A Windows desktop program for a five-day hands-on camp teaching students ages 13
 
 The application runs its AI through [Ollama](https://ollama.com/) on the same computer. After Ollama and a model are installed, ordinary camp use is offline and prompts remain on the machine.
 
-## Current build: v0.7 accessible classroom experience
+## Current build: v2.0 classroom deployment release
 
 - Native Windows shell built with Tauri v2.
 - REACT Camp dashboard and visual identity.
@@ -70,6 +70,18 @@ npm run tauri build
 ```
 
 Installer output is written under `src-tauri/target/release/bundle/`.
+
+## Set up classroom laptops
+
+Each successful Windows workflow build also creates a `react-camp-classroom-setup` artifact. Download and unzip it, then double-click `Setup-REACT-Camp.cmd` on each laptop. The launcher:
+
+1. installs REACT Camp,
+2. installs Ollama when it is missing,
+3. downloads the lightweight `llama3.2:1b` model,
+4. verifies the local AI service, and
+5. opens REACT Camp.
+
+For repeated deployment, place a separately downloaded `OllamaSetup.exe` beside the setup launcher before copying the folder to a USB drive or school file share. This avoids downloading the Ollama installer on every laptop. See `deployment/CLASSROOM-SETUP.txt` for the teacher checklist and requirements.
 
 ## Roadmap
 
