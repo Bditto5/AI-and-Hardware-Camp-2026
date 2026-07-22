@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { buildTemplates } from "../content/buildTemplates";
 import {
   buildPreviewDocument,
   createProjectFromTemplate,
+  duplicateProject,
   ensureProjects,
   getActiveProjectId,
   saveProjects,
   setActiveProjectId,
   withSnapshot,
+  parseProjectFile,
   type CodeProject,
   type CodeSnapshot,
 } from "../storage/projectStore";
@@ -36,6 +38,7 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
   const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
   const [snapshotName, setSnapshotName] = useState("");
   const [coachQuestion, setCoachQuestion] = useState("Help me improve this project. First explain one issue or opportunity, then give one small change to try.");
+  const [projectMessage, setProjectMessage] = useState("");
 
   useEffect(() => {
     setSaveState("saving");
@@ -70,6 +73,7 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
   }
 
   function deleteProject() {
+    if (!window.confirm(`Delete "${project.name}"? Export it first if you may need it later.`)) return;
     const remaining = projects.filter((item) => item.id !== project.id);
     const next = remaining.length > 0 ? remaining : [createProjectFromTemplate()];
     saveProjects(next);
@@ -77,6 +81,17 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
     setProject(next[0]);
     setActiveProjectId(next[0].id);
     setPreview(buildPreviewDocument(next[0]));
+  }
+
+  function duplicateCurrentProject() {
+    const created = duplicateProject(project);
+    const next = [...projects, created];
+    setProjects(next);
+    saveProjects(next);
+    setActiveProjectId(created.id);
+    setProject(created);
+    setPreview(buildPreviewDocument(created));
+    setProjectMessage("Project duplicated with its recovery snapshots.");
   }
 
   function updateCode(value: string) {
@@ -94,8 +109,17 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
   }
 
   function restoreSnapshot(snapshot: CodeSnapshot) {
-    setProject((current) => ({ ...current, html: snapshot.html, css: snapshot.css, javascript: snapshot.javascript, updatedAt: Date.now() }));
+    if (!window.confirm(`Restore "${snapshot.name}"? A recovery snapshot of the current code will be created first.`)) return;
+    const protectedProject = withSnapshot(project, "Before restore");
+    setProject({ ...protectedProject, html: snapshot.html, css: snapshot.css, javascript: snapshot.javascript, updatedAt: Date.now() });
     setPreview(buildPreviewDocument(snapshot));
+    setProjectMessage("Snapshot restored. The previous code is saved as Before restore.");
+  }
+
+
+  function deleteSnapshot(snapshotId: string) {
+    setProject((current) => ({ ...current, snapshots: current.snapshots.filter((item) => item.id !== snapshotId), updatedAt: Date.now() }));
+    setProjectMessage("Snapshot removed.");
   }
 
   function exportProject() {
@@ -106,7 +130,37 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
     anchor.href = url;
     anchor.download = `${safeFileName(project.name)}.html`;
     anchor.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportProjectFile() {
+    const payload = JSON.stringify({ format: "react-camp-project", schemaVersion: 1, exportedAt: new Date().toISOString(), project }, null, 2);
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${safeFileName(project.name)}.react-camp.json`;
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setProjectMessage("Portable project file downloaded.");
+  }
+
+  async function importProjectFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const imported = parseProjectFile(await file.text());
+      const next = [...projects, imported];
+      setProjects(next);
+      saveProjects(next);
+      setActiveProjectId(imported.id);
+      setProject(imported);
+      setPreview(buildPreviewDocument(imported));
+      setProjectMessage(`Imported ${imported.name}.`);
+    } catch (error) {
+      setProjectMessage(error instanceof Error ? error.message : "The project could not be imported.");
+    }
   }
 
   function askCoach() {
@@ -132,8 +186,12 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
       <div className="template-strip">
         <span>New from template:</span>
         {buildTemplates.map((template) => <button key={template.id} onClick={() => createProject(template.id)} title={template.description}>{template.title}</button>)}
+        <button onClick={duplicateCurrentProject}>Duplicate current</button>
+        <button onClick={exportProjectFile}>Export project</button>
+        <label className="build-import-button">Import project<input type="file" accept="application/json,.json" onChange={(event) => void importProjectFile(event)} /></label>
         <button className="danger-link" onClick={deleteProject}>Delete current</button>
       </div>
+      {projectMessage && <p className="build-project-message" role="status">{projectMessage}</p>}
 
       <div className="build-workspace">
         <section className="editor-panel">
@@ -157,7 +215,7 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
         <section className="snapshot-panel">
           <header><div><h2>Snapshots</h2><p>Keep up to ten recovery points.</p></div><div><input value={snapshotName} onChange={(event) => setSnapshotName(event.target.value)} placeholder="Snapshot name" /><button className="camp-secondary" onClick={createSnapshot}>Save snapshot</button></div></header>
           <div className="snapshot-list">
-            {project.snapshots.length === 0 ? <span>No snapshots yet.</span> : [...project.snapshots].reverse().map((snapshot) => <button key={snapshot.id} onClick={() => restoreSnapshot(snapshot)}><strong>{snapshot.name}</strong><small>{new Date(snapshot.createdAt).toLocaleString()}</small></button>)}
+            {project.snapshots.length === 0 ? <span>No snapshots yet.</span> : [...project.snapshots].reverse().map((snapshot) => <div className="snapshot-entry" key={snapshot.id}><button onClick={() => restoreSnapshot(snapshot)}><strong>{snapshot.name}</strong><small>{new Date(snapshot.createdAt).toLocaleString()}</small></button><button className="snapshot-delete" onClick={() => deleteSnapshot(snapshot.id)} aria-label={`Delete snapshot ${snapshot.name}`}>×</button></div>)}
           </div>
         </section>
         <section className="code-coach-panel">
@@ -170,4 +228,3 @@ export function BuildLab({ onAskCoach }: BuildLabProps) {
     </div>
   );
 }
-

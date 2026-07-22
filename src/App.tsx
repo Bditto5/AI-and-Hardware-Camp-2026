@@ -74,6 +74,7 @@ function App() {
   const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>();
   const [aiLaunchId, setAiLaunchId] = useState("general");
   const [teacherSettings, setTeacherSettings] = useState<TeacherSettings>(() => loadTeacherSettings());
+  const [presenterMode, setPresenterMode] = useState(false);
 
   useEffect(() => {
     void initHistoryStore().then(() => setHistoryReady(true));
@@ -98,18 +99,55 @@ function App() {
       (currentDayDone || !currentDay ? 0 : Math.round(((slideIndex + 1) / currentDay.slides.length) * 20)),
   );
 
+  useEffect(() => {
+    if (view !== "learn" || !currentDay) return;
+    function moveSlide(delta: number) {
+      const bounded = Math.max(0, Math.min(currentDay.slides.length - 1, slideIndex + delta));
+      setSlideIndex(bounded);
+      saveLastSlide(selectedDay, bounded);
+      setProgress(loadCampProgress());
+    }
+    function handleLessonKeys(event: KeyboardEvent) {
+      if (event.key === "ArrowRight" || event.key === "PageDown") {
+        event.preventDefault();
+        moveSlide(1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        moveSlide(-1);
+      }
+      if (event.key === "Escape" && presenterMode) {
+        setPresenterMode(false);
+        if (document.fullscreenElement) void document.exitFullscreen();
+      }
+    }
+    window.addEventListener("keydown", handleLessonKeys);
+    return () => window.removeEventListener("keydown", handleLessonKeys);
+  }, [currentDay, presenterMode, selectedDay, slideIndex, view]);
+
   const slideDots = useMemo(
     () => currentDay?.slides.map((slide, index) => ({ id: slide.id, active: index === slideIndex, visited: index <= slideIndex })) ?? [],
     [currentDay, slideIndex],
   );
 
   function navigate(next: View) {
+    if (next !== "learn" && presenterMode) {
+      setPresenterMode(false);
+      if (document.fullscreenElement) void document.exitFullscreen();
+    }
     if ((next === "ai" && !teacherSettings.aiEnabled) || (next === "build" && !teacherSettings.buildEnabled)) {
       setView("teacher");
       return;
     }
     if (next !== "ai") setResumeSessionId(undefined);
     setView(next);
+  }
+
+  function togglePresenterMode() {
+    const next = !presenterMode;
+    setPresenterMode(next);
+    if (next && !document.fullscreenElement) void document.documentElement.requestFullscreen().catch(() => undefined);
+    if (!next && document.fullscreenElement) void document.exitFullscreen();
   }
 
   function openGeneralAI() {
@@ -231,7 +269,7 @@ function App() {
       )}
 
       {view === "learn" && currentSlide && (
-        <main className="camp-page lesson-layout">
+        <main className={`camp-page lesson-layout ${presenterMode ? "presenter-mode" : ""}`}>
           <aside className="lesson-sidebar">
             <p className="camp-eyebrow">FIVE-DAY ARC</p>
             {campDays.map((day) => (
@@ -248,7 +286,7 @@ function App() {
           <section className="lesson-stage">
             <header>
               <div><p className="camp-eyebrow">DAY {currentDay.number} · {currentDay.title.toUpperCase()}</p><h1>{currentSlide.title}</h1></div>
-              <strong>{slideIndex + 1} / {currentDay.slides.length}</strong>
+              <div className="lesson-header-actions"><strong>{slideIndex + 1} / {currentDay.slides.length}</strong><button className="camp-secondary presenter-toggle" onClick={togglePresenterMode}>{presenterMode ? "Exit presenter" : "Presenter mode"}</button></div>
             </header>
             <div className={`lesson-slide tone-${currentSlide.tone}`}>
               {currentSlide.icon && <div className="slide-icon">{currentSlide.icon}</div>}

@@ -28,6 +28,22 @@ function newId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function isSnapshot(value: unknown): value is CodeSnapshot {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<CodeSnapshot>;
+  return typeof item.id === "string" && typeof item.name === "string" && typeof item.createdAt === "number" &&
+    typeof item.html === "string" && typeof item.css === "string" && typeof item.javascript === "string";
+}
+
+export function isCodeProject(value: unknown): value is CodeProject {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<CodeProject>;
+  return typeof item.id === "string" && typeof item.name === "string" && typeof item.templateId === "string" &&
+    typeof item.html === "string" && typeof item.css === "string" && typeof item.javascript === "string" &&
+    typeof item.createdAt === "number" && typeof item.updatedAt === "number" && Array.isArray(item.snapshots) &&
+    item.snapshots.every(isSnapshot);
+}
+
 export function createProjectFromTemplate(templateId = buildTemplates[0]?.id ?? "blank", name?: string): CodeProject {
   const template = buildTemplates.find((item) => item.id === templateId);
   const now = Date.now();
@@ -48,7 +64,7 @@ export function loadProjects(): CodeProject[] {
   try {
     const parsed = JSON.parse(localStorage.getItem(PROJECTS_KEY) ?? "[]") as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is CodeProject => Boolean(item && typeof item === "object" && "id" in item && "html" in item));
+    return parsed.filter(isCodeProject);
   } catch {
     return [];
   }
@@ -85,6 +101,35 @@ export function withSnapshot(project: CodeProject, name: string): CodeProject {
     javascript: project.javascript,
   };
   return { ...project, snapshots: [...project.snapshots, snapshot].slice(-10), updatedAt: Date.now() };
+}
+
+export function duplicateProject(project: CodeProject): CodeProject {
+  const now = Date.now();
+  return {
+    ...project,
+    id: newId("project"),
+    name: `${project.name} Copy`,
+    createdAt: now,
+    updatedAt: now,
+    snapshots: project.snapshots.map((snapshot) => ({ ...snapshot, id: newId("snapshot") })),
+  };
+}
+
+export function parseProjectFile(text: string): CodeProject {
+  const parsed = JSON.parse(text) as unknown;
+  const candidate = parsed && typeof parsed === "object" && "project" in parsed
+    ? (parsed as { project: unknown }).project
+    : parsed;
+  if (!isCodeProject(candidate)) throw new Error("This is not a supported REACT Camp project file.");
+  const now = Date.now();
+  return {
+    ...candidate,
+    id: newId("project"),
+    name: `${candidate.name} (Imported)`,
+    createdAt: now,
+    updatedAt: now,
+    snapshots: candidate.snapshots.slice(-10).map((snapshot) => ({ ...snapshot, id: newId("snapshot") })),
+  };
 }
 
 export function buildPreviewDocument(project: Pick<CodeProject, "html" | "css" | "javascript">): string {

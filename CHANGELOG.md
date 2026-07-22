@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — Presenter mode and portable Build Lab projects
+
+- Added full-screen lesson presenter mode with enlarged classroom typography.
+- Added Arrow, Page Up, Page Down, and Escape keyboard controls for lesson presentation.
+- Added one-click Build Lab project duplication, including recovery snapshots.
+- Added validated portable project JSON export and import.
+- Added confirmation before project deletion and protected snapshot restore.
+- Added an automatic `Before restore` recovery snapshot whenever older code is restored.
+- Added individual snapshot deletion and clear project-action status messages.
+
 ## 0.4.0 — Teacher controls, backup, and restore
 
 - Added a PIN-gated Teacher Hub with first-use access code `2026`.

@@ -1286,6 +1286,39 @@ body {
   border-bottom: none;
 }
 
+/* v0.5 classroom presentation and portable Build Lab projects */
+.build-import-button {
+  padding: 9px 13px;
+  border: 1px solid var(--camp-border);
+  border-radius: 9px;
+  background: #131827;
+  color: var(--camp-muted);
+  font-weight: 800;
+  cursor: pointer;
+}
+.build-import-button:hover { color: white; border-color: var(--camp-purple); }
+.build-import-button input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.build-project-message { margin: -4px 0 12px; padding: 8px 11px; border-left: 3px solid var(--camp-green); background: rgba(103, 230, 149, .08); color: #c9f6d8; font-size: .78rem; }
+.snapshot-entry { min-width: 175px; display: grid; grid-template-columns: 1fr auto; border: 1px solid var(--camp-border); border-radius: 8px; overflow: hidden; background: #111725; }
+.snapshot-entry > button:first-child { min-width: 0; display: flex; flex-direction: column; gap: 3px; border: 0; background: transparent; color: white; text-align: left; }
+.snapshot-entry .snapshot-delete { border: 0; border-left: 1px solid var(--camp-border); border-radius: 0; background: rgba(255, 98, 139, .08); color: #ff9ab8; font-size: 1.15rem; }
+.lesson-header-actions { display: flex; align-items: center; gap: 12px; }
+.presenter-toggle { padding: 8px 11px; font-size: .72rem; }
+.lesson-layout.presenter-mode { grid-template-columns: 1fr; min-height: 100vh; padding: 0; background: #080b12; }
+.presenter-mode .lesson-sidebar { display: none; }
+.presenter-mode .lesson-stage { padding: 34px 5vw 26px; }
+.presenter-mode .lesson-stage > header { margin-bottom: 20px; }
+.presenter-mode .lesson-stage > header h1 { font-size: clamp(1.8rem, 4vw, 3.3rem); }
+.presenter-mode .lesson-slide { min-height: calc(100vh - 210px); padding: clamp(28px, 5vw, 70px); display: flex; flex-direction: column; justify-content: center; }
+.presenter-mode .lesson-slide h2 { font-size: clamp(2rem, 5vw, 4.6rem); }
+.presenter-mode .lesson-slide .slide-body, .presenter-mode .lesson-slide li { font-size: clamp(1.05rem, 2vw, 1.65rem); }
+.presenter-mode .lesson-controls { position: fixed; left: 5vw; right: 5vw; bottom: 18px; z-index: 5; padding: 10px; border: 1px solid var(--camp-border); border-radius: 14px; background: rgba(8, 11, 18, .92); backdrop-filter: blur(12px); }
+
+@media (max-width: 900px) {
+  .template-strip { flex-wrap: wrap; }
+  .template-strip .danger-link { margin-left: 0; }
+}
+
 @media print {
   body {
     background: white;
