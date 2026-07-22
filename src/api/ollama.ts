@@ -19,6 +19,7 @@ export type OllamaErrorKind =
   | "timeout"
   | "model_missing"
   | "model_error"
+  | "stopped"
   | "unknown";
 
 export interface PullProgressUpdate {
@@ -183,6 +184,7 @@ async function invokeOllamaLineStream(options: {
   bodyJson: string;
   requestId: string;
   timeoutMs: number;
+  signal?: AbortSignal;
   onLine: (line: string) => void;
 }): Promise<void> {
   let done = false;
@@ -255,6 +257,16 @@ async function invokeOllamaLineStream(options: {
     }
   });
 
+  const handleAbort = () => {
+    void invoke<boolean>("ollama_cancel_request", { requestId: options.requestId })
+      .then((cancelled) => {
+        if (!cancelled) finishError(new Error("STOPPED"));
+      })
+      .catch((err) => finishError(new Error(toErrorMessage(err, "Couldn't stop the Ollama request."))));
+  };
+  options.signal?.addEventListener("abort", handleAbort, { once: true });
+  if (options.signal?.aborted) handleAbort();
+
   try {
     const invokePromise = invoke(options.command, {
       url: options.url,
@@ -268,6 +280,7 @@ async function invokeOllamaLineStream(options: {
     await invokePromise;
   } finally {
     clearIdleTimer();
+    options.signal?.removeEventListener("abort", handleAbort);
     unlisten();
   }
 }
@@ -490,7 +503,7 @@ export async function checkConnection(): Promise<OllamaResult<void>> {
 
 export async function sendChat(
   messages: ChatRequestMessage[],
-  options?: { onChunk?: (chunk: string, fullText: string) => void },
+  options?: { onChunk?: (chunk: string, fullText: string) => void; signal?: AbortSignal },
 ): Promise<OllamaResult<string>> {
   if (!isConfigured()) {
     return { ok: false, error: "not_configured", message: NOT_CONFIGURED_MESSAGE };
@@ -513,6 +526,7 @@ export async function sendChat(
       }),
       requestId,
       timeoutMs: requestTimeoutMs,
+      signal: options?.signal,
       onLine: (line) => {
         const event = JSON.parse(line) as ChatStreamEvent;
 
@@ -539,6 +553,10 @@ export async function sendChat(
     return { ok: true, value: assistantText };
   } catch (err) {
     const message = toErrorMessage(err, "Couldn't reach Ollama.");
+
+    if (message === "STOPPED") {
+      return { ok: false, error: "stopped", message: "Response stopped." };
+    }
 
     if (message.startsWith("MODEL_ERROR:")) {
       return {

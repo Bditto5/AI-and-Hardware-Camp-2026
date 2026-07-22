@@ -123,6 +123,8 @@ function ChatPanelBody({
   initialState,
 }: ChatPanelBodyProps) {
   const sessionIdRef = useRef<string | null>(initialSessionId);
+  const sessionCreationRef = useRef<Promise<string> | null>(null);
+  const persistenceQueueRef = useRef<Promise<void>>(Promise.resolve());
 
   const handleTurnComplete = useCallback(
     (turnMessages: ChatMessage[]) => {
@@ -134,21 +136,28 @@ function ChatPanelBody({
         attachment: m.attachment,
         outgoingContent: m.outgoingContent,
       }));
-      void (async () => {
+      persistenceQueueRef.current = persistenceQueueRef.current.then(async () => {
         if (!sessionIdRef.current) {
-          sessionIdRef.current = await createChatSession({
+          sessionCreationRef.current ??= createChatSession({
             title: deriveChatSessionTitle(prompt, turnMessages),
             promptId: surface === "assistant" ? null : prompt.id,
             surface,
           });
+          sessionIdRef.current = await sessionCreationRef.current;
         }
         await saveChatTurn(sessionIdRef.current, { messages: storedMessages });
-      })();
+      }).catch((error) => {
+        console.error("Couldn't save chat progress", error);
+      });
     },
     [prompt, surface],
   );
 
-  const { messages, isSending, sendMessage, reset } = useChat({ initialState, onTurnComplete: handleTurnComplete });
+  const { messages, isSending, sendMessage, stop, reset } = useChat({
+    initialState,
+    onTurnProgress: handleTurnComplete,
+    onTurnComplete: handleTurnComplete,
+  });
   const [personalization] = useState(() => loadPersonalization());
   const [draft, setDraft] = useState(initialMessage ? "" : prompt.template);
   const [tone, setTone] = useState<Personalization["tone"]>(personalization.tone);
@@ -455,9 +464,13 @@ function ChatPanelBody({
           >
             From library
           </Button>
-          <Button type="submit" disabled={connectionState !== "ok" || isSending || !draft.trim()}>
-            Send
-          </Button>
+          {isSending ? (
+            <Button type="button" variant="secondary" onClick={stop}>Stop response</Button>
+          ) : (
+            <Button type="submit" disabled={connectionState !== "ok" || !draft.trim()}>
+              Send
+            </Button>
+          )}
         </div>
       </form>
     </div>
