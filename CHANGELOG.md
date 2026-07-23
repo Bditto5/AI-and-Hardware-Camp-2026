@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1 — REACT icon release
+
+- Replaced the previous combined-symbol application icon with the green REACT wordmark and robot hand.
+- Regenerated the Windows shortcut, Start menu, Store, installer, and application icon assets.
+- Updated application and backup metadata versions to 2.1.1.
+
 ## 2.0.0 — Classroom deployment release
 
 - Added a one-click classroom setup package for repeatable Windows laptop deployment.
