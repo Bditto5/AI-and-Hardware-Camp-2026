@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0 — Follow Along release
+
+- Added a "Follow Along" tab to Build, alongside the existing Build Lab editor.
+- Added a guided, offline, one-step-at-a-time walkthrough of eight outside AI lessons across three tracks: Chatbots, Face Detection, and Machine Learning.
+- Added copy-ready prompts on every step for the existing local AI Coach, including a per-step bug-report prompt.
+- Added a hand-off from Follow Along into a fresh Build Lab project for the lesson that builds a web page.
+- Added local progress tracking for Follow Along lessons and steps, included in Teacher Hub backups, resets, and the live progress stats.
+- Updated application and backup metadata versions to 2.2.0.
+
 ## 2.1.1 — REACT icon release
 
 - Replaced the previous combined-symbol application icon with the green REACT wordmark and robot hand.
