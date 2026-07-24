@@ -219,6 +219,82 @@
   .camp-topbar nav button { padding-left: 8px; padding-right: 8px; font-size: .75rem; }
 }
 
+.build-area { min-height: calc(100vh - 68px); background: var(--camp-bg); }
+.build-area-tabs { padding: 14px 24px 0; background: transparent; border-bottom: 1px solid var(--camp-border); }
+.build-area-tabs button { padding: 11px 18px; font-size: .82rem; }
+
+.follow-along { display: grid; grid-template-columns: 308px 1fr; min-height: calc(100vh - 68px - 49px); }
+.follow-lesson-rail { padding: 22px 16px; border-right: 1px solid var(--camp-border); background: #101421; }
+.follow-lesson-rail .camp-eyebrow { padding-left: 4px; }
+.follow-lesson-search { width: 100%; margin-bottom: 12px; padding: 10px 12px; border: 1px solid var(--camp-border); border-radius: 9px; background: #0e1220; color: var(--camp-text); }
+.follow-track-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.follow-track-filters button { padding: 7px 11px; border: 1px solid var(--camp-border); border-radius: 999px; background: transparent; color: var(--camp-muted); font-size: .72rem; font-weight: 800; }
+.follow-track-filters button.active { color: white; border-color: var(--camp-purple); background: #332b78; }
+.follow-lesson-list { display: flex; flex-direction: column; gap: 6px; }
+.follow-lesson-empty { padding: 14px 4px; color: var(--camp-muted); font-size: .82rem; }
+.follow-lesson-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--camp-muted); text-align: left; }
+.follow-lesson-item:hover { border-color: var(--camp-border); }
+.follow-lesson-item.active { background: var(--camp-card); color: white; border-color: var(--camp-purple); }
+.follow-lesson-item-text { display: flex; flex-direction: column; gap: 3px; }
+.follow-lesson-item-text strong { font-size: .86rem; }
+.follow-lesson-item-text small { color: #687299; font-weight: 500; }
+.follow-lesson-dot { flex: 0 0 auto; width: 10px; height: 10px; margin-top: 4px; border-radius: 50%; background: #343d5c; }
+.follow-lesson-dot.done { background: var(--camp-green); box-shadow: 0 0 8px var(--camp-green); }
+
+.follow-content { min-width: 0; padding: 26px 32px 48px; overflow-y: auto; }
+.follow-lesson-header h1 { margin: 6px 0 8px; font-size: 1.7rem; }
+.follow-lesson-summary { margin: 0 0 16px; color: var(--camp-muted); line-height: 1.6; max-width: 720px; }
+.follow-lesson-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
+.follow-lesson-meta h3 { margin: 0 0 8px; font-size: .82rem; color: var(--camp-muted); text-transform: uppercase; letter-spacing: .06em; }
+.follow-lesson-meta ul { margin: 0; padding-left: 20px; color: var(--camp-text); line-height: 1.6; }
+.follow-open-build-lab { margin-bottom: 14px; }
+.follow-lesson-source { color: var(--camp-muted); font-size: .78rem; }
+.follow-lesson-source a { color: #a49eff; }
+
+.follow-step-panel { border: 1px solid var(--camp-border); border-radius: 14px; background: var(--camp-card); padding: 22px; }
+.follow-step-panel-stacked { display: flex; flex-direction: column; gap: 18px; background: transparent; border: 0; padding: 0; }
+.follow-step-panel-stacked .follow-step-body { border: 1px solid var(--camp-border); border-radius: 14px; background: var(--camp-card); padding: 22px; }
+.follow-step-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.follow-step-chip { display: flex; align-items: center; gap: 8px; padding: 8px 13px; border: 1px solid var(--camp-border); border-radius: 999px; background: #111725; color: var(--camp-muted); font-size: .76rem; font-weight: 700; }
+.follow-step-chip.current { border-color: var(--camp-purple); color: white; background: #332b78; }
+.follow-step-chip.done .follow-step-chip-number { color: var(--camp-green); }
+.follow-step-chip-number { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #0e1220; font-size: .68rem; }
+.follow-step-body h2 { margin: 0 0 8px; font-size: 1.2rem; }
+.follow-step-why { color: var(--camp-muted); line-height: 1.6; margin: 0 0 10px; }
+.follow-step-target { display: inline-block; margin: 0 0 12px; padding: 5px 10px; border-radius: 999px; background: #ffc85714; color: var(--camp-yellow); font-size: .72rem; font-weight: 800; }
+.follow-step-actions { margin: 0 0 16px; padding-left: 22px; color: var(--camp-text); line-height: 1.7; }
+.follow-step-actions li { margin: 6px 0; }
+.follow-mark-done { margin-top: 6px; padding: 11px 16px; border: 1px solid var(--camp-purple); border-radius: 9px; background: transparent; color: var(--camp-text); font-weight: 800; }
+.follow-mark-done.done { background: var(--camp-green); border-color: var(--camp-green); color: #0b2015; }
+.follow-next-step { margin-top: 16px; }
+
+.follow-prompt-card { margin: 16px 0; padding: 16px; border: 1px solid var(--camp-border); border-radius: 12px; background: #101421; }
+.follow-prompt-card h3 { margin: 0 0 10px; font-size: .8rem; color: var(--camp-muted); text-transform: uppercase; letter-spacing: .06em; }
+.follow-prompt-text { margin: 0 0 8px; padding: 13px; border: 1px solid var(--camp-border); border-radius: 9px; background: #090d16; color: #dfe4f7; font: 500 .82rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; }
+.follow-prompt-note { margin: 0 0 10px; color: var(--camp-muted); font-size: .78rem; }
+.follow-prompt-extra-label { display: block; margin-bottom: 6px; color: var(--camp-muted); font-size: .74rem; font-weight: 800; }
+.follow-prompt-card textarea { width: 100%; margin-bottom: 10px; padding: 9px 11px; border: 1px solid var(--camp-border); border-radius: 8px; background: #0e1220; color: white; resize: vertical; }
+.follow-prompt-actions { display: flex; gap: 8px; }
+
+.follow-media-slot { margin: 14px 0; }
+.follow-media-slot img, .follow-media-slot video { width: 100%; max-height: 360px; border-radius: 10px; border: 1px solid var(--camp-border); background: black; object-fit: contain; }
+.follow-media-caption { margin: 8px 0 0; color: var(--camp-muted); font-size: .76rem; }
+.follow-media-placeholder { margin: 14px 0; padding: 30px; display: grid; place-items: center; border: 1px dashed var(--camp-border); border-radius: 12px; background: #101421; color: var(--camp-muted); font-size: .82rem; text-align: center; }
+
+.follow-finish-card { margin-top: 18px; padding: 20px; border: 1px solid var(--camp-green); border-radius: 14px; background: rgba(64, 209, 123, .08); }
+.follow-finish-card h2 { margin: 6px 0 14px; }
+.follow-finish-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.follow-finish-grid h3 { margin: 0 0 8px; font-size: .82rem; color: var(--camp-muted); text-transform: uppercase; letter-spacing: .06em; }
+.follow-finish-grid ul { margin: 0; padding-left: 20px; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .follow-along { grid-template-columns: 1fr; }
+  .follow-lesson-rail { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-right: 0; border-bottom: 1px solid var(--camp-border); max-height: 260px; overflow-y: auto; }
+  .follow-content { padding: 20px 16px 40px; }
+  .follow-lesson-meta { grid-template-columns: 1fr; }
+  .follow-finish-grid { grid-template-columns: 1fr; }
+}
+
 /* --------------------------------------------------------------------------
    REACT Camp desktop shell
    -------------------------------------------------------------------------- */

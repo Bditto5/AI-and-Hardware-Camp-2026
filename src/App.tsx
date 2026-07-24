@@ -4,7 +4,7 @@ import { HistoryPanel } from "./components/HistoryPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { GamesPanel } from "./components/GamesPanel";
 import { ActivitiesPanel } from "./components/ActivitiesPanel";
-import { BuildLab } from "./components/BuildLab";
+import { BuildArea } from "./components/BuildArea";
 import { TeacherPanel } from "./components/TeacherPanel";
 import { checkConnection } from "./api/ollama";
 import { initHistoryStore } from "./storage/historyStore";
@@ -56,6 +56,17 @@ const ACTIVITY_COACH_PROMPT: Prompt = {
 const CODE_COACH_PREAMBLE = `${CAMP_PREAMBLE}
 You are now the code coach. Prefer diagnosis, questions, and one small testable change at a time.
 Do not claim to run the code. Never provide code that accesses the network, local files, browser storage, popups, or the host application.`;
+
+const FOLLOW_COACH_PROMPT: Prompt = {
+  id: "react-camp-follow-coach",
+  title: "REACT Camp Follow Along Coach",
+  description: "A local coach for the Follow Along guided lessons.",
+  category: "engagement",
+  template: "Describe where you are in the lesson and what you want help with.",
+};
+
+const FOLLOW_PREAMBLE = `${CAMP_PREAMBLE}
+You are now the Follow Along build coach. Answer in plain language, short sentences, no jargon without a definition. Give runnable HTML/CSS/JavaScript only — no network requests, no external files, no browser storage. End with one sentence the student can say out loud to explain what the code does.`;
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -178,6 +189,13 @@ function App() {
     setAiPrompt(CODE_COACH_PROMPT);
     setAiInitialMessage(message);
     setAiLaunchId(`code-${Date.now()}`);
+    navigate("ai");
+  }
+
+  function openFollowCoach(message: string) {
+    setAiPrompt(FOLLOW_COACH_PROMPT);
+    setAiInitialMessage(message);
+    setAiLaunchId("follow-" + Date.now());
     navigate("ai");
   }
 
@@ -332,7 +350,13 @@ function App() {
             onBack={() => navigate("home")}
             surface="assistant"
             initialMessage={resumeSessionId ? undefined : aiInitialMessage}
-            messagePreamble={aiPrompt.id === CODE_COACH_PROMPT.id ? CODE_COACH_PREAMBLE : CAMP_PREAMBLE}
+            messagePreamble={
+              aiPrompt.id === CODE_COACH_PROMPT.id
+                ? CODE_COACH_PREAMBLE
+                : aiPrompt.id === FOLLOW_COACH_PROMPT.id
+                  ? FOLLOW_PREAMBLE
+                  : CAMP_PREAMBLE
+            }
             resumeSessionId={resumeSessionId}
           />
         </main>
@@ -342,7 +366,7 @@ function App() {
 
       {view === "activities" && <main className="camp-page"><ActivitiesPanel onCoach={openActivityCoach} onBuild={() => navigate("build")} /></main>}
 
-      {view === "build" && <main className="camp-page"><BuildLab onAskCoach={openCodeCoach} /></main>}
+      {view === "build" && <main className="camp-page"><BuildArea onAskCoach={openCodeCoach} onAskFollowCoach={openFollowCoach} /></main>}
 
       {view === "history" && (
         <main className="camp-page embedded-feature">
