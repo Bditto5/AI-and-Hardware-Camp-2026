@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { sendChat } from "../api/ollama";
 import { buildTemplates } from "../content/buildTemplates";
 import {
@@ -26,6 +26,9 @@ type EditorTab = "html" | "css" | "javascript";
 
 interface BuildLabProps {
   onAskCoach: (message: string) => void;
+  /** Creates and opens a fresh project from this template on first mount only. Absent by default — no change to normal behavior. */
+  seedTemplateId?: string;
+  seedProjectName?: string;
 }
 
 function pickInitialProject(projects: CodeProject[]): CodeProject {
@@ -37,12 +40,27 @@ function safeFileName(name: string): string {
   return name.trim().replace(/[^a-z0-9_-]+/gi, "-").replace(/^-|-$/g, "") || "react-camp-project";
 }
 
-export function BuildLab({ onAskCoach }: BuildLabProps) {
+export function BuildLab({ onAskCoach, seedTemplateId, seedProjectName }: BuildLabProps) {
   const initialProjects = useMemo(() => ensureProjects(), []);
-  const [projects, setProjects] = useState<CodeProject[]>(initialProjects);
-  const [project, setProject] = useState<CodeProject>(() => pickInitialProject(initialProjects));
+  const seededProjectRef = useRef<CodeProject | null>(null);
+  function getSeededProject(): CodeProject | null {
+    if (!seedTemplateId) return null;
+    if (!seededProjectRef.current) {
+      seededProjectRef.current = createProjectFromTemplate(seedTemplateId, seedProjectName);
+    }
+    return seededProjectRef.current;
+  }
+  const [projects, setProjects] = useState<CodeProject[]>(() => {
+    const seeded = getSeededProject();
+    if (!seeded) return initialProjects;
+    const next = [...initialProjects, seeded];
+    saveProjects(next);
+    setActiveProjectId(seeded.id);
+    return next;
+  });
+  const [project, setProject] = useState<CodeProject>(() => getSeededProject() ?? pickInitialProject(initialProjects));
   const [tab, setTab] = useState<EditorTab>("html");
-  const [preview, setPreview] = useState(() => buildPreviewDocument(pickInitialProject(initialProjects)));
+  const [preview, setPreview] = useState(() => buildPreviewDocument(getSeededProject() ?? pickInitialProject(initialProjects)));
   const [saveState, setSaveState] = useState<"saved" | "saving">("saved");
   const [snapshotName, setSnapshotName] = useState("");
   const [coachQuestion, setCoachQuestion] = useState("Help me improve this project. First explain one issue or opportunity, then give one small change to try.");

@@ -2,6 +2,8 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { listSessionSummaries } from "../storage/historyStore";
 import { loadCampProgress } from "../storage/campProgressStore";
 import { loadProjects } from "../storage/projectStore";
+import { followLessons } from "../content/followLessons";
+import { loadFollowProgress } from "../storage/followProgressStore";
 import {
   createCampBackup,
   loadTeacherSettings,
@@ -21,6 +23,7 @@ interface TeacherStats {
   chats: number;
   builds: number;
   activities: number;
+  followLessons: number;
 }
 
 function activityCount(): number {
@@ -38,7 +41,7 @@ export function TeacherPanel({ onSettingsChanged }: { onSettingsChanged: (settin
   const [newPin, setNewPin] = useState("");
   const [settings, setSettings] = useState(() => loadTeacherSettings());
   const [message, setMessage] = useState("Enter the teacher access code. The first-use code is 2026.");
-  const [stats, setStats] = useState<TeacherStats>({ days: 0, chats: 0, builds: 0, activities: 0 });
+  const [stats, setStats] = useState<TeacherStats>({ days: 0, chats: 0, builds: 0, activities: 0, followLessons: 0 });
 
   useEffect(() => {
     if (!unlocked) return;
@@ -48,6 +51,7 @@ export function TeacherPanel({ onSettingsChanged }: { onSettingsChanged: (settin
         chats: sessions.filter((item) => item.type === "chat").length,
         builds: loadProjects().length,
         activities: activityCount(),
+        followLessons: loadFollowProgress().finishedLessons.length,
       });
     });
   }, [unlocked, message]);
@@ -136,6 +140,7 @@ export function TeacherPanel({ onSettingsChanged }: { onSettingsChanged: (settin
         <article><strong>{stats.activities}/12</strong><span>Activities complete</span></article>
         <article><strong>{stats.chats}</strong><span>Saved AI chats</span></article>
         <article><strong>{stats.builds}</strong><span>Build projects</span></article>
+        <article><strong>{stats.followLessons}/{followLessons.length}</strong><span>Follow Along lessons</span></article>
       </section>
 
       <p className="teacher-message" role="status">{message}</p>

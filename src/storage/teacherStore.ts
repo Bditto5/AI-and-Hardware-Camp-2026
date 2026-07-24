@@ -14,6 +14,7 @@ const BACKUP_KEYS = [
   "react-camp-game-scores-v1",
   "react-camp-code-projects-v1",
   "react-camp-active-code-project-v1",
+  "react-camp-follow-v1",
   "react-camp-teacher-pin-v1",
   "react-camp-teacher-settings-v1",
   "educatorllm-personalization-v1",
@@ -25,6 +26,7 @@ const PROGRESS_KEYS = [
   "react-camp-progress-v1",
   "react-camp-activity-progress-v1",
   "react-camp-game-scores-v1",
+  "react-camp-follow-v1",
 ] as const;
 
 const PROJECT_KEYS = ["react-camp-code-projects-v1", "react-camp-active-code-project-v1"] as const;
