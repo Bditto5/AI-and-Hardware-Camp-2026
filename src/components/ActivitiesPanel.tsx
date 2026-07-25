@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { campActivities, type ActivityCategory } from "../content/activities";
 
 const COMPLETED_KEY = "react-camp-activity-progress-v1";
+const ANSWERS_KEY = "react-camp-activity-answers-v1";
 
 function loadCompleted(): string[] {
   try {
@@ -9,6 +10,19 @@ function loadCompleted(): string[] {
     return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
   } catch {
     return [];
+  }
+}
+
+function loadAnswers(): Record<string, string> {
+  try {
+    const value = JSON.parse(localStorage.getItem(ANSWERS_KEY) ?? "{}") as unknown;
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+    const entries = Object.entries(value as Record<string, unknown>).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    );
+    return Object.fromEntries(entries);
+  } catch {
+    return {};
   }
 }
 
@@ -29,6 +43,7 @@ export function ActivitiesPanel({ onCoach, onBuild, initialActivityId }: Activit
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<string | null>(() => initialActivityId?.id ?? null);
   const [completed, setCompleted] = useState<string[]>(() => loadCompleted());
+  const [answers, setAnswers] = useState<Record<string, string>>(() => loadAnswers());
 
   useEffect(() => {
     if (initialActivityId) setExpanded(initialActivityId.id);
@@ -48,6 +63,12 @@ export function ActivitiesPanel({ onCoach, onBuild, initialActivityId }: Activit
     const next = completed.includes(id) ? completed.filter((item) => item !== id) : [...completed, id];
     setCompleted(next);
     localStorage.setItem(COMPLETED_KEY, JSON.stringify(next));
+  }
+
+  function updateAnswer(id: string, text: string) {
+    const next = { ...answers, [id]: text };
+    setAnswers(next);
+    localStorage.setItem(ANSWERS_KEY, JSON.stringify(next));
   }
 
   return (
@@ -78,6 +99,15 @@ export function ActivitiesPanel({ onCoach, onBuild, initialActivityId }: Activit
                   <p className="activity-description">{activity.description}</p>
                   {activity.safety && <p className="activity-safety"><strong>Safety:</strong> {activity.safety}</p>}
                   <ol>{activity.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+                  <label className="activity-answer">
+                    <span>Your answer / notes</span>
+                    <textarea
+                      value={answers[activity.id] ?? ""}
+                      onChange={(event) => updateAnswer(activity.id, event.target.value)}
+                      placeholder="Write your observations, recommendation, or notes for this activity here."
+                      rows={4}
+                    />
+                  </label>
                   <div className="activity-actions">
                     {activity.category === "build" && <button className="camp-secondary" onClick={onBuild}>Open Build Lab</button>}
                     {activity.coachPrompt && <button className="camp-secondary" onClick={() => onCoach(activity.coachPrompt ?? "")}>Ask AI Coach</button>}

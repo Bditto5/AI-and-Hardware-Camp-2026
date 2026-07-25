@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { ChatPanel } from "./components/ChatPanel";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
@@ -70,6 +77,16 @@ const FOLLOW_COACH_PROMPT: Prompt = {
 const FOLLOW_PREAMBLE = `${CAMP_PREAMBLE}
 You are now the Follow Along build coach. Answer in plain language, short sentences, no jargon without a definition. Give runnable HTML/CSS/JavaScript only — no network requests, no external files, no browser storage. End with one sentence the student can say out loud to explain what the code does.`;
 
+const COACH_SPLIT_KEY = "react-camp-coach-split-v1";
+const COACH_SPLIT_MIN = 25;
+const COACH_SPLIT_MAX = 75;
+
+function loadCoachSplitPercent(): number {
+  const raw = Number(localStorage.getItem(COACH_SPLIT_KEY));
+  if (!Number.isFinite(raw)) return 50;
+  return Math.min(COACH_SPLIT_MAX, Math.max(COACH_SPLIT_MIN, raw));
+}
+
 function App() {
   const [view, setView] = useState<View>("home");
   const [progress, setProgress] = useState<CampProgress>(() => loadCampProgress());
@@ -92,6 +109,7 @@ function App() {
   const [pendingBuildTab, setPendingBuildTab] = useState<PendingBuildTab | undefined>();
   const [coachOpen, setCoachOpen] = useState(false);
   const [coachFullScreen, setCoachFullScreen] = useState(true);
+  const [coachSplitPercent, setCoachSplitPercent] = useState(() => loadCoachSplitPercent());
   const mainContentRef = useRef<HTMLDivElement>(null);
   const isInitialView = useRef(true);
 
@@ -201,6 +219,44 @@ function App() {
 
   function toggleCoachFullScreen() {
     setCoachFullScreen((current) => !current);
+  }
+
+  function applyDividerPercent(clientX: number) {
+    const container = mainContentRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const rawPercent = ((clientX - rect.left) / rect.width) * 100;
+    const clamped = Math.min(COACH_SPLIT_MAX, Math.max(COACH_SPLIT_MIN, rawPercent));
+    setCoachSplitPercent(clamped);
+  }
+
+  function startDividerDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    event.preventDefault();
+    const handleMove = (moveEvent: PointerEvent) => applyDividerPercent(moveEvent.clientX);
+    const handleUp = () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+      setCoachSplitPercent((current) => {
+        localStorage.setItem(COACH_SPLIT_KEY, String(current));
+        return current;
+      });
+    };
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+  }
+
+  function nudgeDividerByKeyboard(event: ReactKeyboardEvent<HTMLDivElement>) {
+    let delta = 0;
+    if (event.key === "ArrowLeft") delta = -2;
+    else if (event.key === "ArrowRight") delta = 2;
+    else return;
+    event.preventDefault();
+    setCoachSplitPercent((current) => {
+      const next = Math.min(COACH_SPLIT_MAX, Math.max(COACH_SPLIT_MIN, current + delta));
+      localStorage.setItem(COACH_SPLIT_KEY, String(next));
+      return next;
+    });
   }
 
   function openGeneralAI() {
@@ -334,7 +390,10 @@ function App() {
       </header>
 
       <div id="camp-main-content" ref={mainContentRef} tabIndex={-1} className={coachOpen ? "has-coach" : ""}>
-      <div className={`camp-view-pane ${coachOpen && coachFullScreen ? "camp-view-pane-hidden" : ""}`}>
+      <div
+        className={`camp-view-pane ${coachOpen && coachFullScreen ? "camp-view-pane-hidden" : ""}`}
+        style={coachOpen && !coachFullScreen ? { flexBasis: `${coachSplitPercent}%` } : undefined}
+      >
 
       {view === "home" && (
         <main className="camp-page camp-home">
@@ -488,11 +547,27 @@ function App() {
       )}
       </div>
 
+      {coachOpen && !coachFullScreen && (
+        <div
+          className="camp-coach-divider"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize AI Coach panel"
+          aria-valuenow={Math.round(coachSplitPercent)}
+          aria-valuemin={COACH_SPLIT_MIN}
+          aria-valuemax={COACH_SPLIT_MAX}
+          tabIndex={0}
+          onPointerDown={startDividerDrag}
+          onKeyDown={nudgeDividerByKeyboard}
+        />
+      )}
+
       {coachOpen && (
         <div
           className={`camp-coach-pane embedded-feature ${coachFullScreen ? "full-screen" : "split"}`}
           role="complementary"
           aria-label="AI Coach"
+          style={!coachFullScreen ? { flexBasis: `${100 - coachSplitPercent}%` } : undefined}
         >
           <div className="camp-coach-toolbar">
             <button className="camp-coach-toggle" onClick={toggleCoachFullScreen} aria-pressed={coachFullScreen}>

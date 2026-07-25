@@ -11,6 +11,7 @@ const SETTINGS_KEY = "react-camp-teacher-settings-v1";
 const BACKUP_KEYS = [
   "react-camp-progress-v1",
   "react-camp-activity-progress-v1",
+  "react-camp-activity-answers-v1",
   "react-camp-game-scores-v1",
   "react-camp-code-projects-v1",
   "react-camp-active-code-project-v1",
@@ -25,6 +26,7 @@ const BACKUP_KEYS = [
 const PROGRESS_KEYS = [
   "react-camp-progress-v1",
   "react-camp-activity-progress-v1",
+  "react-camp-activity-answers-v1",
   "react-camp-game-scores-v1",
   "react-camp-follow-v1",
 ] as const;
@@ -82,7 +84,7 @@ export async function createCampBackup(): Promise<CampBackupBundle> {
     format: "react-camp-backup",
     schemaVersion: 1,
     createdAt: new Date().toISOString(),
-    appVersion: "2.3.2",
+    appVersion: "2.4.0",
     localStorage: values,
     history: await exportHistoryData(),
   };
