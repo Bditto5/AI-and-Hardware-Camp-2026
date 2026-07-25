@@ -420,6 +420,16 @@ button { cursor: pointer; }
 .embedded-feature p, .embedded-feature .settings-hint { color: var(--camp-muted); }.embedded-feature h1, .embedded-feature h2, .embedded-feature h3 { color: var(--camp-text); }
 .loading-card { padding: 30px; border: 1px solid var(--camp-border); border-radius: 14px; background: var(--camp-panel); }
 
+#camp-main-content.has-coach { display: flex; align-items: stretch; height: calc(100vh - 68px); overflow: hidden; }
+#camp-main-content.has-coach .camp-view-pane { flex: 1 1 50%; min-width: 0; height: 100%; overflow-y: auto; }
+#camp-main-content.has-coach .camp-view-pane-hidden { display: none; }
+.camp-coach-pane { flex: 1 1 50%; min-width: 320px; height: 100%; display: flex; flex-direction: column; border-left: 1px solid var(--camp-border); background: var(--camp-panel); overflow-y: auto; }
+.camp-coach-pane.full-screen { flex: 1 1 100%; border-left: 0; }
+.camp-coach-toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.camp-coach-toggle { padding: 7px 12px; border: 1px solid var(--camp-border); border-radius: 8px; background: #1a2033; color: var(--camp-text); font-size: .76rem; font-weight: 800; }
+.camp-coach-toggle:hover { border-color: var(--camp-purple); }
+.camp-coach-pane .chat-panel { height: auto; flex: 1; min-height: 0; }
+
 .legacy-shell { height: calc(100vh - 68px); display: flex; flex-direction: column; }
 .legacy-banner { min-height: 54px; display: flex; align-items: center; gap: 18px; padding: 10px 20px; background: #2b245c; border-bottom: 1px solid #766cff; }.legacy-banner span { color: #c8c5e8; font-size: .8rem; }
 .legacy-shell iframe { width: 100%; flex: 1; border: 0; background: var(--camp-bg); }

@@ -3,8 +3,8 @@ import { ChatPanel } from "./components/ChatPanel";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { GamesPanel } from "./components/GamesPanel";
-import { ActivitiesPanel } from "./components/ActivitiesPanel";
-import { BuildArea } from "./components/BuildArea";
+import { ActivitiesPanel, type PendingActivity } from "./components/ActivitiesPanel";
+import { BuildArea, type PendingBuildTab } from "./components/BuildArea";
 import { TeacherPanel } from "./components/TeacherPanel";
 import { NavMenu } from "./components/NavMenu";
 import { checkConnection } from "./api/ollama";
@@ -22,7 +22,7 @@ import {
 } from "./storage/campProgressStore";
 import { loadTeacherSettings, type TeacherSettings } from "./storage/teacherStore";
 
-type View = "home" | "learn" | "activities" | "build" | "games" | "ai" | "history" | "teacher" | "settings" | "legacy";
+type View = "home" | "learn" | "activities" | "build" | "games" | "history" | "teacher" | "settings" | "legacy";
 
 const CAMP_PROMPT: Prompt = {
   id: "react-camp-ai-coach",
@@ -88,8 +88,10 @@ function App() {
   const [aiLaunchId, setAiLaunchId] = useState("general");
   const [teacherSettings, setTeacherSettings] = useState<TeacherSettings>(() => loadTeacherSettings());
   const [presenterMode, setPresenterMode] = useState(false);
-  const [pendingActivityId, setPendingActivityId] = useState<string | undefined>();
-  const [pendingBuildTab, setPendingBuildTab] = useState<"lab" | "follow" | undefined>();
+  const [pendingActivityId, setPendingActivityId] = useState<PendingActivity | undefined>();
+  const [pendingBuildTab, setPendingBuildTab] = useState<PendingBuildTab | undefined>();
+  const [coachOpen, setCoachOpen] = useState(false);
+  const [coachFullScreen, setCoachFullScreen] = useState(true);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const isInitialView = useRef(true);
 
@@ -163,11 +165,13 @@ function App() {
       setPresenterMode(false);
       if (document.fullscreenElement) void document.exitFullscreen();
     }
-    if ((next === "ai" && !teacherSettings.aiEnabled) || (next === "build" && !teacherSettings.buildEnabled)) {
+    if (next === "build" && !teacherSettings.buildEnabled) {
       setView("teacher");
       return;
     }
-    if (next !== "ai") setResumeSessionId(undefined);
+    // Switching sections should never leave the new section hidden behind a full-screen coach —
+    // drop back to split so both are visible, without closing the conversation.
+    if (coachOpen && coachFullScreen) setCoachFullScreen(false);
     setView(next);
   }
 
@@ -178,32 +182,41 @@ function App() {
     if (!next && document.fullscreenElement) void document.exitFullscreen();
   }
 
+  function openCoachPanel(prompt: Prompt, message: string | undefined, launchId: string, fullScreen: boolean) {
+    if (!teacherSettings.aiEnabled) {
+      setView("teacher");
+      return;
+    }
+    setResumeSessionId(undefined);
+    setAiPrompt(prompt);
+    setAiInitialMessage(message);
+    setAiLaunchId(launchId);
+    setCoachFullScreen(fullScreen);
+    setCoachOpen(true);
+  }
+
+  function closeCoach() {
+    setCoachOpen(false);
+  }
+
+  function toggleCoachFullScreen() {
+    setCoachFullScreen((current) => !current);
+  }
+
   function openGeneralAI() {
-    setAiPrompt(CAMP_PROMPT);
-    setAiInitialMessage(undefined);
-    setAiLaunchId(`general-${Date.now()}`);
-    navigate("ai");
+    openCoachPanel(CAMP_PROMPT, undefined, `general-${Date.now()}`, true);
   }
 
   function openActivityCoach(message: string) {
-    setAiPrompt(ACTIVITY_COACH_PROMPT);
-    setAiInitialMessage(message);
-    setAiLaunchId(`activity-${Date.now()}`);
-    navigate("ai");
+    openCoachPanel(ACTIVITY_COACH_PROMPT, message, `activity-${Date.now()}`, false);
   }
 
   function openCodeCoach(message: string) {
-    setAiPrompt(CODE_COACH_PROMPT);
-    setAiInitialMessage(message);
-    setAiLaunchId(`code-${Date.now()}`);
-    navigate("ai");
+    openCoachPanel(CODE_COACH_PROMPT, message, `code-${Date.now()}`, false);
   }
 
   function openFollowCoach(message: string) {
-    setAiPrompt(FOLLOW_COACH_PROMPT);
-    setAiInitialMessage(message);
-    setAiLaunchId("follow-" + Date.now());
-    navigate("ai");
+    openCoachPanel(FOLLOW_COACH_PROMPT, message, `follow-${Date.now()}`, false);
   }
 
   function goToSlide(nextIndex: number) {
@@ -228,12 +241,12 @@ function App() {
   }
 
   function openActivity(id: string) {
-    setPendingActivityId(id);
+    setPendingActivityId({ id, nonce: Date.now() });
     navigate("activities");
   }
 
   function openBuildTab(tab: "lab" | "follow") {
-    setPendingBuildTab(tab);
+    setPendingBuildTab({ tab, nonce: Date.now() });
     navigate("build");
   }
 
@@ -261,7 +274,8 @@ function App() {
     setResumeSessionId(summary.id);
     setAiPrompt(CAMP_PROMPT);
     setAiInitialMessage(undefined);
-    setView("ai");
+    setCoachFullScreen(true);
+    setCoachOpen(true);
   }
 
   return (
@@ -309,7 +323,7 @@ function App() {
             ]}
           />
           <button className={view === "games" ? "active" : ""} aria-current={view === "games" ? "page" : undefined} onClick={() => navigate("games")}>Games</button>
-          <button className={view === "ai" ? "active" : ""} aria-current={view === "ai" ? "page" : undefined} onClick={openGeneralAI}>AI Lab</button>
+          <button className={coachOpen ? "active" : ""} aria-current={coachOpen ? "page" : undefined} onClick={openGeneralAI}>AI Lab</button>
           <button className={view === "history" ? "active" : ""} aria-current={view === "history" ? "page" : undefined} onClick={() => navigate("history")}>History</button>
           <button className={view === "teacher" ? "active" : ""} aria-current={view === "teacher" ? "page" : undefined} onClick={() => navigate("teacher")}>Teacher</button>
           <button className={view === "settings" ? "active" : ""} onClick={() => navigate("settings")} aria-label="Settings">⚙</button>
@@ -319,7 +333,8 @@ function App() {
         </div>
       </header>
 
-      <div id="camp-main-content" ref={mainContentRef} tabIndex={-1}>
+      <div id="camp-main-content" ref={mainContentRef} tabIndex={-1} className={coachOpen ? "has-coach" : ""}>
+      <div className={`camp-view-pane ${coachOpen && coachFullScreen ? "camp-view-pane-hidden" : ""}`}>
 
       {view === "home" && (
         <main className="camp-page camp-home">
@@ -449,26 +464,6 @@ function App() {
         </main>
       )}
 
-      {view === "ai" && (
-        <main className="camp-page embedded-feature">
-          <ChatPanel
-            key={resumeSessionId ?? aiLaunchId}
-            prompt={aiPrompt}
-            onBack={() => navigate("home")}
-            surface="assistant"
-            initialMessage={resumeSessionId ? undefined : aiInitialMessage}
-            messagePreamble={
-              aiPrompt.id === CODE_COACH_PROMPT.id
-                ? CODE_COACH_PREAMBLE
-                : aiPrompt.id === FOLLOW_COACH_PROMPT.id
-                  ? FOLLOW_PREAMBLE
-                  : CAMP_PREAMBLE
-            }
-            resumeSessionId={resumeSessionId}
-          />
-        </main>
-      )}
-
       {view === "games" && <main className="camp-page"><GamesPanel /></main>}
 
       {view === "activities" && <main className="camp-page"><ActivitiesPanel onCoach={openActivityCoach} onBuild={openBuildOverview} initialActivityId={pendingActivityId} /></main>}
@@ -490,6 +485,36 @@ function App() {
           <div className="legacy-banner"><strong>Full interactive camp</strong><span>The complete curriculum, activities, games, and Build Lab remain available while each module is migrated into the desktop shell.</span></div>
           <iframe title="Complete REACT Camp curriculum" src="/legacy/curriculum.html" sandbox="allow-scripts allow-forms allow-downloads" />
         </main>
+      )}
+      </div>
+
+      {coachOpen && (
+        <div
+          className={`camp-coach-pane embedded-feature ${coachFullScreen ? "full-screen" : "split"}`}
+          role="complementary"
+          aria-label="AI Coach"
+        >
+          <div className="camp-coach-toolbar">
+            <button className="camp-coach-toggle" onClick={toggleCoachFullScreen} aria-pressed={coachFullScreen}>
+              {coachFullScreen ? "⤢ Split view" : "⛶ Full screen"}
+            </button>
+          </div>
+          <ChatPanel
+            key={resumeSessionId ?? aiLaunchId}
+            prompt={aiPrompt}
+            onBack={closeCoach}
+            surface="assistant"
+            initialMessage={resumeSessionId ? undefined : aiInitialMessage}
+            messagePreamble={
+              aiPrompt.id === CODE_COACH_PROMPT.id
+                ? CODE_COACH_PREAMBLE
+                : aiPrompt.id === FOLLOW_COACH_PROMPT.id
+                  ? FOLLOW_PREAMBLE
+                  : CAMP_PREAMBLE
+            }
+            resumeSessionId={resumeSessionId}
+          />
+        </div>
       )}
       </div>
     </div>
