@@ -501,7 +501,39 @@ export async function checkConnection(): Promise<OllamaResult<void>> {
   return { ok: true, value: undefined };
 }
 
-export async function sendChat(
+// Local models are CPU-bound and can pin every core for the length of a
+// generation. The app has several independent surfaces that can each call
+// sendChat (the AI Lab chat panel, the Build Lab code coach, the IEP
+// assistant) and nothing previously stopped two of them from generating at
+// once — on the camp's target hardware (CPU-only, 8GB RAM) that starves the
+// whole machine, including other applications like the browser, for the
+// duration of both generations. This queue forces every sendChat call
+// through the app to run one at a time.
+let chatQueueTail: Promise<void> = Promise.resolve();
+
+export function sendChat(
+  messages: ChatRequestMessage[],
+  options?: { onChunk?: (chunk: string, fullText: string) => void; signal?: AbortSignal },
+): Promise<OllamaResult<string>> {
+  const previous = chatQueueTail;
+  let release: () => void = () => {};
+  chatQueueTail = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+
+  return previous.then(async () => {
+    try {
+      if (options?.signal?.aborted) {
+        return { ok: false, error: "stopped", message: "Response stopped." };
+      }
+      return await sendChatNow(messages, options);
+    } finally {
+      release();
+    }
+  });
+}
+
+async function sendChatNow(
   messages: ChatRequestMessage[],
   options?: { onChunk?: (chunk: string, fullText: string) => void; signal?: AbortSignal },
 ): Promise<OllamaResult<string>> {
