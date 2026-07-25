@@ -7,6 +7,8 @@ type BuildTab = "lab" | "follow";
 interface BuildAreaProps {
   onAskCoach: (message: string) => void;
   onAskFollowCoach: (message: string) => void;
+  /** Selects this tab on first mount only. Absent by default — no change to normal behavior. */
+  initialTab?: BuildTab;
 }
 
 interface PendingSeed {
@@ -15,8 +17,8 @@ interface PendingSeed {
   key: number;
 }
 
-export function BuildArea({ onAskCoach, onAskFollowCoach }: BuildAreaProps) {
-  const [tab, setTab] = useState<BuildTab>("lab");
+export function BuildArea({ onAskCoach, onAskFollowCoach, initialTab }: BuildAreaProps) {
+  const [tab, setTab] = useState<BuildTab>(() => initialTab ?? "lab");
   const [pendingSeed, setPendingSeed] = useState<PendingSeed | null>(null);
 
   function openBuildLab(templateId?: string, projectName?: string) {
