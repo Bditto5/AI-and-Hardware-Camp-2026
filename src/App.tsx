@@ -6,11 +6,13 @@ import { GamesPanel } from "./components/GamesPanel";
 import { ActivitiesPanel } from "./components/ActivitiesPanel";
 import { BuildArea } from "./components/BuildArea";
 import { TeacherPanel } from "./components/TeacherPanel";
+import { NavMenu } from "./components/NavMenu";
 import { checkConnection } from "./api/ollama";
 import { initHistoryStore } from "./storage/historyStore";
 import type { SessionSummary } from "./storage/types";
 import type { Prompt } from "./prompts/schema";
 import { campDays } from "./content/campDays";
+import { campActivities } from "./content/activities";
 import {
   getNextIncompleteDay,
   loadCampProgress,
@@ -86,6 +88,8 @@ function App() {
   const [aiLaunchId, setAiLaunchId] = useState("general");
   const [teacherSettings, setTeacherSettings] = useState<TeacherSettings>(() => loadTeacherSettings());
   const [presenterMode, setPresenterMode] = useState(false);
+  const [pendingActivityId, setPendingActivityId] = useState<string | undefined>();
+  const [pendingBuildTab, setPendingBuildTab] = useState<"lab" | "follow" | undefined>();
   const mainContentRef = useRef<HTMLDivElement>(null);
   const isInitialView = useRef(true);
 
@@ -107,7 +111,10 @@ function App() {
       isInitialView.current = false;
       return;
     }
-    window.requestAnimationFrame(() => mainContentRef.current?.focus());
+    window.requestAnimationFrame(() => {
+      mainContentRef.current?.focus({ preventScroll: true });
+      window.scrollTo(0, 0);
+    });
   }, [view]);
 
   const currentDay = campDays[selectedDay - 1];
@@ -215,6 +222,31 @@ function App() {
     setSlideIndex(Math.min(savedIndex, nextDay.slides.length - 1));
   }
 
+  function openDay(day: number) {
+    selectDay(day);
+    navigate("learn");
+  }
+
+  function openActivity(id: string) {
+    setPendingActivityId(id);
+    navigate("activities");
+  }
+
+  function openBuildTab(tab: "lab" | "follow") {
+    setPendingBuildTab(tab);
+    navigate("build");
+  }
+
+  function openActivitiesOverview() {
+    setPendingActivityId(undefined);
+    navigate("activities");
+  }
+
+  function openBuildOverview() {
+    setPendingBuildTab(undefined);
+    navigate("build");
+  }
+
   function completeCurrentDay() {
     markDayComplete(selectedDay);
     setProgress(loadCampProgress());
@@ -242,9 +274,40 @@ function App() {
         </button>
         <nav aria-label="Main navigation">
           <button className={view === "home" ? "active" : ""} aria-current={view === "home" ? "page" : undefined} onClick={() => navigate("home")}>Home</button>
-          <button className={view === "learn" ? "active" : ""} aria-current={view === "learn" ? "page" : undefined} onClick={() => navigate("learn")}>Learn</button>
-          <button className={view === "activities" ? "active" : ""} aria-current={view === "activities" ? "page" : undefined} onClick={() => navigate("activities")}>Activities</button>
-          <button className={view === "build" ? "active" : ""} aria-current={view === "build" ? "page" : undefined} onClick={() => navigate("build")}>Build</button>
+          <NavMenu
+            label="Learn"
+            active={view === "learn"}
+            overviewLabel={progress.completedDays.length === campDays.length ? "Review the camp" : `Continue Day ${nextIncompleteDay}`}
+            onOverviewSelect={() => openDay(nextIncompleteDay)}
+            items={campDays.map((day) => ({
+              key: String(day.number),
+              label: `Day ${day.number}: ${day.title}`,
+              meta: progress.completedDays.includes(day.number) ? "Complete ✓" : day.subtitle,
+              onSelect: () => openDay(day.number),
+            }))}
+          />
+          <NavMenu
+            label="Activities"
+            active={view === "activities"}
+            overviewLabel="Open all activities"
+            onOverviewSelect={openActivitiesOverview}
+            items={campActivities.map((activity) => ({
+              key: activity.id,
+              label: activity.title,
+              meta: `${activity.difficulty} · ${activity.duration}`,
+              onSelect: () => openActivity(activity.id),
+            }))}
+          />
+          <NavMenu
+            label="Build"
+            active={view === "build"}
+            overviewLabel="Open Build"
+            onOverviewSelect={openBuildOverview}
+            items={[
+              { key: "lab", label: "Build Lab", meta: "Code editor, safe preview, snapshots", onSelect: () => openBuildTab("lab") },
+              { key: "follow", label: "Follow Along", meta: "Guided outside AI lessons", onSelect: () => openBuildTab("follow") },
+            ]}
+          />
           <button className={view === "games" ? "active" : ""} aria-current={view === "games" ? "page" : undefined} onClick={() => navigate("games")}>Games</button>
           <button className={view === "ai" ? "active" : ""} aria-current={view === "ai" ? "page" : undefined} onClick={openGeneralAI}>AI Lab</button>
           <button className={view === "history" ? "active" : ""} aria-current={view === "history" ? "page" : undefined} onClick={() => navigate("history")}>History</button>
@@ -284,10 +347,54 @@ function App() {
             <div className={`status-message ${ollamaState}`}>{ollamaMessage}</div>
           </section>
 
-          <section className="camp-grid">
-            <article className="feature-card green">
-              <span>05</span><h2>Complete learning arc</h2><p>All five days are available with saved slide and day progress.</p><button onClick={() => navigate("learn")}>Open lessons →</button>
-            </article>
+          <section className="camp-section">
+            <div className="camp-section-header">
+              <div><p className="camp-eyebrow">FIVE-DAY ARC</p><h2>Jump to any day</h2></div>
+            </div>
+            <div className="camp-days-grid">
+              {campDays.map((day) => {
+                const isDone = progress.completedDays.includes(day.number);
+                return (
+                  <button key={day.number} className={`camp-day-card ${isDone ? "complete" : ""}`} onClick={() => openDay(day.number)}>
+                    <span className="camp-day-card-label">DAY {day.number}</span>
+                    <strong>{day.title}</strong>
+                    <small>{isDone ? "Complete ✓" : day.subtitle}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="camp-section">
+            <div className="camp-section-header">
+              <div><p className="camp-eyebrow">HANDS-ON PRACTICE</p><h2>Jump to any activity</h2></div>
+              <button className="camp-secondary" onClick={openActivitiesOverview}>See all →</button>
+            </div>
+            <div className="camp-activities-grid">
+              {campActivities.map((activity) => (
+                <button key={activity.id} className="camp-activity-card" onClick={() => openActivity(activity.id)}>
+                  <span className={`activity-category ${activity.category}`}>{activity.category === "hardware" ? "HW" : activity.category === "ai" ? "AI" : "CODE"}</span>
+                  <span className="camp-activity-card-text"><strong>{activity.title}</strong><small>{activity.difficulty} · {activity.duration}</small></span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="camp-section">
+            <div className="camp-section-header">
+              <div><p className="camp-eyebrow">CREATE + TEST + EXPLAIN</p><h2>Build</h2></div>
+            </div>
+            <div className="camp-grid camp-grid-2">
+              <article className="feature-card purple">
+                <span>{"</>"}</span><h2>Build Lab</h2><p>Edit HTML, CSS, and JavaScript with a safe live preview, snapshots, and starter templates.</p><button onClick={() => openBuildTab("lab")}>Open Build Lab →</button>
+              </article>
+              <article className="feature-card green">
+                <span>▶</span><h2>Follow Along</h2><p>A guided, offline, step-by-step walkthrough of eight outside AI lessons.</p><button onClick={() => openBuildTab("follow")}>Open Follow Along →</button>
+              </article>
+            </div>
+          </section>
+
+          <section className="camp-grid camp-grid-2">
             <article className="feature-card purple">
               <span>AI</span><h2>AI Lab</h2><p>Ask questions, improve prompts, attach a document, and keep every conversation.</p><button onClick={openGeneralAI}>Open AI Lab →</button>
             </article>
@@ -364,9 +471,9 @@ function App() {
 
       {view === "games" && <main className="camp-page"><GamesPanel /></main>}
 
-      {view === "activities" && <main className="camp-page"><ActivitiesPanel onCoach={openActivityCoach} onBuild={() => navigate("build")} /></main>}
+      {view === "activities" && <main className="camp-page"><ActivitiesPanel onCoach={openActivityCoach} onBuild={openBuildOverview} initialActivityId={pendingActivityId} /></main>}
 
-      {view === "build" && <main className="camp-page"><BuildArea onAskCoach={openCodeCoach} onAskFollowCoach={openFollowCoach} /></main>}
+      {view === "build" && <main className="camp-page"><BuildArea onAskCoach={openCodeCoach} onAskFollowCoach={openFollowCoach} initialTab={pendingBuildTab} /></main>}
 
       {view === "history" && (
         <main className="camp-page embedded-feature">

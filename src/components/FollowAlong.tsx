@@ -126,6 +126,16 @@ export function FollowAlong({ onAskCoach, onOpenBuildLab }: FollowAlongProps) {
             </button>
           )}
 
+          {lesson.tools && lesson.tools.length > 0 && (
+            <div className="follow-lesson-tools">
+              {lesson.tools.map((tool) => (
+                <a key={tool.url} className="camp-secondary follow-tool-link" href={tool.url} target="_blank" rel="noreferrer">
+                  Open {tool.name} ↗
+                </a>
+              ))}
+            </div>
+          )}
+
           <p className="follow-lesson-source">
             Adapted from{" "}
             <a href={lesson.source.url} target="_blank" rel="noreferrer">

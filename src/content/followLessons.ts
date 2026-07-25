@@ -30,6 +30,7 @@ export interface FollowLesson {
   success: string[];
   extensions: string[];
   templateId?: string;
+  tools?: { name: string; url: string }[];
   source: { name: string; url: string };
 }
 
@@ -402,6 +403,10 @@ export const followLessons: FollowLesson[] = [
       "Add a second input, like a second button or a sensor.",
       "Ask the AI Coach for one safety reminder for your specific board.",
     ],
+    tools: [
+      { name: "micro:bit MakeCode editor", url: "https://makecode.microbit.org/" },
+      { name: "Arduino Web Editor", url: "https://create.arduino.cc/editor" },
+    ],
     source: CARDBOARD_SOURCE,
   },
   {
@@ -493,6 +498,7 @@ export const followLessons: FollowLesson[] = [
       "Make a sprite grow or shrink based on how close your face is.",
       "Add a costume change when a certain face position is reached.",
     ],
+    tools: [{ name: "Scratch", url: "https://scratch.mit.edu/" }],
     source: CARDBOARD_SOURCE,
   },
   {
@@ -578,6 +584,7 @@ export const followLessons: FollowLesson[] = [
       "Add a second player controlled by keyboard for a two-way race.",
       "Add sound effects when the score changes.",
     ],
+    tools: [{ name: "Scratch", url: "https://scratch.mit.edu/" }],
     source: CARDBOARD_SOURCE,
   },
   {
@@ -677,6 +684,7 @@ export const followLessons: FollowLesson[] = [
       "Add a third class and retrain.",
       "Export your model and note its name for the next lesson.",
     ],
+    tools: [{ name: "Teachable Machine", url: "https://teachablemachine.withgoogle.com/" }],
     source: CARDBOARD_SOURCE,
   },
   {
@@ -761,6 +769,10 @@ export const followLessons: FollowLesson[] = [
     extensions: [
       "Add a third class from your model with its own reaction.",
       "Add a score that goes up each time a specific class is detected.",
+    ],
+    tools: [
+      { name: "Scratch", url: "https://scratch.mit.edu/" },
+      { name: "Teachable Machine", url: "https://teachablemachine.withgoogle.com/" },
     ],
     source: CARDBOARD_SOURCE,
   },

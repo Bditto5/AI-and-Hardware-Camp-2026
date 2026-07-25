@@ -15,12 +15,14 @@ function loadCompleted(): string[] {
 interface ActivitiesPanelProps {
   onCoach: (prompt: string) => void;
   onBuild: () => void;
+  /** Pre-expands this activity on first mount only. Absent by default — no change to normal behavior. */
+  initialActivityId?: string;
 }
 
-export function ActivitiesPanel({ onCoach, onBuild }: ActivitiesPanelProps) {
+export function ActivitiesPanel({ onCoach, onBuild, initialActivityId }: ActivitiesPanelProps) {
   const [filter, setFilter] = useState<"all" | ActivityCategory>("all");
   const [query, setQuery] = useState("");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(() => initialActivityId ?? null);
   const [completed, setCompleted] = useState<string[]>(() => loadCompleted());
 
   const visible = useMemo(() => {
