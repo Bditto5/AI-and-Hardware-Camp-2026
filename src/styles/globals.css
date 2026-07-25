@@ -188,6 +188,10 @@
 .activity-description { color: #dbe0f4; line-height: 1.6; }
 .activity-safety { padding: 11px 13px; border-left: 4px solid var(--camp-yellow); border-radius: 7px; background: #ffc85714; color: #f8dc91; }
 .activity-details ol { padding-left: 22px; color: var(--camp-muted); line-height: 1.6; }.activity-details li { margin: 9px 0; padding-left: 5px; }
+.activity-answer { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+.activity-answer span { font-size: .76rem; font-weight: 800; color: var(--camp-muted); letter-spacing: .04em; text-transform: uppercase; }
+.activity-answer textarea { padding: 11px 13px; border: 1px solid var(--camp-border); border-radius: 8px; background: #0e1220; color: white; font: inherit; resize: vertical; }
+.activity-answer textarea:focus { outline: none; border-color: var(--camp-purple); }
 .activity-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
 .empty-activities { padding: 35px; text-align: center; color: var(--camp-muted); border: 1px dashed var(--camp-border); border-radius: 14px; }
 
@@ -429,6 +433,10 @@ button { cursor: pointer; }
 .camp-coach-toggle { padding: 7px 12px; border: 1px solid var(--camp-border); border-radius: 8px; background: #1a2033; color: var(--camp-text); font-size: .76rem; font-weight: 800; }
 .camp-coach-toggle:hover { border-color: var(--camp-purple); }
 .camp-coach-pane .chat-panel { height: auto; flex: 1; min-height: 0; }
+.camp-coach-divider { flex: 0 0 6px; height: 100%; cursor: col-resize; background: transparent; touch-action: none; }
+.camp-coach-divider::after { content: ""; display: block; width: 2px; height: 100%; margin: 0 auto; background: var(--camp-border); }
+.camp-coach-divider:hover, .camp-coach-divider:focus-visible { background: #ffffff12; outline: none; }
+.camp-coach-divider:hover::after, .camp-coach-divider:focus-visible::after { background: var(--camp-purple); }
 
 .legacy-shell { height: calc(100vh - 68px); display: flex; flex-direction: column; }
 .legacy-banner { min-height: 54px; display: flex; align-items: center; gap: 18px; padding: 10px 20px; background: #2b245c; border-bottom: 1px solid #766cff; }.legacy-banner span { color: #c8c5e8; font-size: .8rem; }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0 — Resizable AI Coach and Activity answers
+
+- The AI Coach split view now has a draggable divider between the coach and the rest of the app, so you can freely resize the split instead of a fixed 50/50 layout. The size you choose is remembered next time you open the coach.
+- Activities now has a "Your answer / notes" box under each activity's steps so students can record their observations, recommendations, and reflections instead of only marking an activity complete. Answers are saved locally, included in Teacher Hub backups, and cleared by "Reset progress" alongside activity completion.
+- Updated application and backup metadata versions to 2.4.0.
+
 ## 2.3.2 — CPU fix for overlapping AI generations
 
 - Fixed a bug where opening the AI Lab chat and also using the Build Lab code coach or the IEP assistant "Draft with AI" at the same time could run two local AI generations at once, pinning every CPU core and making the whole computer (including other apps like the browser) unresponsive until they finished. Only one AI generation now runs at a time app-wide.
