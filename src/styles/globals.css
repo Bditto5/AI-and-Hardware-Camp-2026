@@ -248,6 +248,8 @@
 .follow-lesson-meta h3 { margin: 0 0 8px; font-size: .82rem; color: var(--camp-muted); text-transform: uppercase; letter-spacing: .06em; }
 .follow-lesson-meta ul { margin: 0; padding-left: 20px; color: var(--camp-text); line-height: 1.6; }
 .follow-open-build-lab { margin-bottom: 14px; }
+.follow-lesson-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.follow-tool-link { display: inline-block; text-decoration: none; }
 .follow-lesson-source { color: var(--camp-muted); font-size: .78rem; }
 .follow-lesson-source a { color: #a49eff; }
 

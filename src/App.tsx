@@ -107,7 +107,10 @@ function App() {
       isInitialView.current = false;
       return;
     }
-    window.requestAnimationFrame(() => mainContentRef.current?.focus());
+    window.requestAnimationFrame(() => {
+      mainContentRef.current?.focus({ preventScroll: true });
+      window.scrollTo(0, 0);
+    });
   }, [view]);
 
   const currentDay = campDays[selectedDay - 1];
