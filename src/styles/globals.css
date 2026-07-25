@@ -323,7 +323,7 @@ button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 
 .camp-app { min-height: 100vh; background: radial-gradient(circle at 72% 0%, #24204e 0, transparent 32%), var(--camp-bg); }
-.camp-topbar { height: 68px; padding: 0 24px; display: flex; align-items: center; gap: 24px; background: rgba(15, 19, 31, .94); border-bottom: 1px solid var(--camp-border); position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); }
+.camp-topbar { height: 68px; padding: 0 24px; display: flex; align-items: center; gap: 24px; background: rgba(15, 19, 31, .94); border-bottom: 1px solid var(--camp-border); position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); transform: translateZ(0); }
 .camp-brand { display: flex; align-items: center; gap: 10px; border: 0; background: transparent; color: var(--camp-text); text-align: left; padding: 0; }
 .camp-brand strong { display: block; font-size: 1rem; letter-spacing: .02em; }
 .camp-brand small { display: block; color: var(--camp-muted); font-size: .67rem; letter-spacing: .16em; text-transform: uppercase; margin-top: 2px; }
