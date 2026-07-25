@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.1 — CPU fix for overlapping AI generations
+
+- Fixed a bug where opening the AI Lab chat and also using the Build Lab code coach or the IEP assistant "Draft with AI" at the same time could run two local AI generations at once, pinning every CPU core and making the whole computer (including other apps like the browser) unresponsive until they finished. Only one AI generation now runs at a time app-wide.
+- Updated application and backup metadata versions to 2.3.1.
+
 ## 2.3.0 — Split-screen AI Coach
 
 - The AI Coach now opens as a panel that splits the screen with whatever you're doing (Follow Along, Build Lab, Activities) instead of navigating away from it, with a Full screen / Split view toggle in the panel's corner.
