@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { campActivities, type ActivityCategory } from "../content/activities";
 
 const COMPLETED_KEY = "react-camp-activity-progress-v1";
@@ -12,18 +12,28 @@ function loadCompleted(): string[] {
   }
 }
 
+export interface PendingActivity {
+  id: string;
+  nonce: number;
+}
+
 interface ActivitiesPanelProps {
   onCoach: (prompt: string) => void;
   onBuild: () => void;
-  /** Pre-expands this activity on first mount only. Absent by default — no change to normal behavior. */
-  initialActivityId?: string;
+  /** Pre-expands this activity whenever it changes (by nonce), not just on first mount — ActivitiesPanel may already be mounted when a new selection arrives. Absent by default — no change to normal behavior. */
+  initialActivityId?: PendingActivity;
 }
 
 export function ActivitiesPanel({ onCoach, onBuild, initialActivityId }: ActivitiesPanelProps) {
   const [filter, setFilter] = useState<"all" | ActivityCategory>("all");
   const [query, setQuery] = useState("");
-  const [expanded, setExpanded] = useState<string | null>(() => initialActivityId ?? null);
+  const [expanded, setExpanded] = useState<string | null>(() => initialActivityId?.id ?? null);
   const [completed, setCompleted] = useState<string[]>(() => loadCompleted());
+
+  useEffect(() => {
+    if (initialActivityId) setExpanded(initialActivityId.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialActivityId?.nonce]);
 
   const visible = useMemo(() => {
     const normalized = query.trim().toLowerCase();

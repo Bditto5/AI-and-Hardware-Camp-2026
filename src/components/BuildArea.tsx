@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BuildLab } from "./BuildLab";
 import { FollowAlong } from "./FollowAlong";
 
 type BuildTab = "lab" | "follow";
 
+export interface PendingBuildTab {
+  tab: BuildTab;
+  nonce: number;
+}
+
 interface BuildAreaProps {
   onAskCoach: (message: string) => void;
   onAskFollowCoach: (message: string) => void;
-  /** Selects this tab on first mount only. Absent by default — no change to normal behavior. */
-  initialTab?: BuildTab;
+  /** Selects this tab whenever it changes (by nonce), not just on first mount — BuildArea may already be mounted when a new selection arrives. Absent by default — no change to normal behavior. */
+  initialTab?: PendingBuildTab;
 }
 
 interface PendingSeed {
@@ -18,8 +23,13 @@ interface PendingSeed {
 }
 
 export function BuildArea({ onAskCoach, onAskFollowCoach, initialTab }: BuildAreaProps) {
-  const [tab, setTab] = useState<BuildTab>(() => initialTab ?? "lab");
+  const [tab, setTab] = useState<BuildTab>(() => initialTab?.tab ?? "lab");
   const [pendingSeed, setPendingSeed] = useState<PendingSeed | null>(null);
+
+  useEffect(() => {
+    if (initialTab) setTab(initialTab.tab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTab?.nonce]);
 
   function openBuildLab(templateId?: string, projectName?: string) {
     setPendingSeed({ templateId, projectName, key: Date.now() });
