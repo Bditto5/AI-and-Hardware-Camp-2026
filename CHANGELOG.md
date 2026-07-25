@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.1 — Navigation and Ask AI fixes
+
+- Fixed the local AI coach header (Back/title/New chat) rendering hidden and unclickable behind the top nav bar after navigating from Build Lab's "Open full chat" or the AI Lab nav item.
+- Added real "Open Scratch" / "Open Teachable Machine" / "Open MakeCode" / "Open Arduino Web Editor" links to the Follow Along lessons that reference those tools.
+- Added dropdown menus to the Learn, Activities, and Build nav items listing every day, every activity, and both Build tabs, one click from anywhere.
+- Expanded Home with browsable Day, Activity, and Build sections in place of the single generic "Complete learning arc" card.
+- Updated application and backup metadata versions to 2.2.1.
+
 ## 2.2.0 — Follow Along release
 
 - Added a "Follow Along" tab to Build, alongside the existing Build Lab editor.
