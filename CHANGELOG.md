@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.0 — Split-screen AI Coach
+
+- The AI Coach now opens as a panel that splits the screen with whatever you're doing (Follow Along, Build Lab, Activities) instead of navigating away from it, with a Full screen / Split view toggle in the panel's corner.
+- The AI Lab nav item and resuming a saved chat from History default to full screen; every contextual "Ask the AI Coach" action defaults to split.
+- Switching to a different section while the coach is full screen now drops it back to split automatically, instead of hiding the new section behind it.
+- Fixed nav-dropdown selections (like switching Build Lab and Follow Along, or jumping to a different activity) silently doing nothing when already on that section.
+- Added a small rendering fix for the top nav bar to prevent a Windows rendering glitch after a screen change.
+- Updated application and backup metadata versions to 2.3.0.
+
 ## 2.2.1 — Navigation and Ask AI fixes
 
 - Fixed the local AI coach header (Back/title/New chat) rendering hidden and unclickable behind the top nav bar after navigating from Build Lab's "Open full chat" or the AI Lab nav item.
