@@ -1,6 +1,6 @@
 [package]
 name = "react-camp-desktop"
-version = "2.4.1"
+version = "2.5.0"
 description = "Offline-first AI and computer hardware camp for Windows"
 authors = ["Bradley Ditto"]
 edition = "2021"

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.0 — REACT brand colors
+
+- Recolored the app's primary accent from purple to a forest green matching the REACT organization's actual logo (buttons, navigation, links, focus states, the logo mark, and the home page's hero glow), and shifted secondary muted text from a blue-gray to a neutral gray. Content-variety colors (lesson slide tones, activity category tags, feature card icons) are unchanged, since those exist for visual variety rather than as the app's brand identity.
+- Updated application and backup metadata versions to 2.5.0.
+
 ## 2.4.1 — AI Coach fixes
 
 - Added a "Hide coach" button so Build Lab (or any other screen) can go back to full width while the AI Coach conversation stays open in the background, with a floating "AI Coach" button to bring it back — previously the only way back to full width was closing the coach entirely.
