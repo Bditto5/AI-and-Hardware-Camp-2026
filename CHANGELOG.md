@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.1 — AI Coach fixes
+
+- Added a "Hide coach" button so Build Lab (or any other screen) can go back to full width while the AI Coach conversation stays open in the background, with a floating "AI Coach" button to bring it back — previously the only way back to full width was closing the coach entirely.
+- Fixed the Tone and Length dropdowns in the AI Coach rendering with invisible white-on-white text.
+- Simplified the Build Lab "Local AI code coach" panel to a single "Ask AI Coach" prompt helper. The previous "Get reviewable change" flow depended on the local model returning strict JSON and frequently failed with "the coach did not return a reviewable code suggestion" on smaller classroom models; questions now always go to the full AI Coach chat instead.
+- Updated application and backup metadata versions to 2.4.1.
+
 ## 2.4.0 — Resizable AI Coach and Activity answers
 
 - The AI Coach split view now has a draggable divider between the coach and the rest of the app, so you can freely resize the split instead of a fixed 50/50 layout. The size you choose is remembered next time you open the coach.
