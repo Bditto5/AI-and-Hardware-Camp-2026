@@ -109,6 +109,7 @@ function App() {
   const [pendingBuildTab, setPendingBuildTab] = useState<PendingBuildTab | undefined>();
   const [coachOpen, setCoachOpen] = useState(false);
   const [coachFullScreen, setCoachFullScreen] = useState(true);
+  const [coachMinimized, setCoachMinimized] = useState(false);
   const [coachSplitPercent, setCoachSplitPercent] = useState(() => loadCoachSplitPercent());
   const mainContentRef = useRef<HTMLDivElement>(null);
   const isInitialView = useRef(true);
@@ -210,15 +211,25 @@ function App() {
     setAiInitialMessage(message);
     setAiLaunchId(launchId);
     setCoachFullScreen(fullScreen);
+    setCoachMinimized(false);
     setCoachOpen(true);
   }
 
   function closeCoach() {
     setCoachOpen(false);
+    setCoachMinimized(false);
   }
 
   function toggleCoachFullScreen() {
     setCoachFullScreen((current) => !current);
+  }
+
+  function minimizeCoach() {
+    setCoachMinimized(true);
+  }
+
+  function restoreCoach() {
+    setCoachMinimized(false);
   }
 
   function applyDividerPercent(clientX: number) {
@@ -331,6 +342,7 @@ function App() {
     setAiPrompt(CAMP_PROMPT);
     setAiInitialMessage(undefined);
     setCoachFullScreen(true);
+    setCoachMinimized(false);
     setCoachOpen(true);
   }
 
@@ -391,8 +403,8 @@ function App() {
 
       <div id="camp-main-content" ref={mainContentRef} tabIndex={-1} className={coachOpen ? "has-coach" : ""}>
       <div
-        className={`camp-view-pane ${coachOpen && coachFullScreen ? "camp-view-pane-hidden" : ""}`}
-        style={coachOpen && !coachFullScreen ? { flexBasis: `${coachSplitPercent}%` } : undefined}
+        className={`camp-view-pane ${coachOpen && coachFullScreen && !coachMinimized ? "camp-view-pane-hidden" : ""}`}
+        style={coachOpen && !coachFullScreen && !coachMinimized ? { flexBasis: `${coachSplitPercent}%` } : undefined}
       >
 
       {view === "home" && (
@@ -547,7 +559,7 @@ function App() {
       )}
       </div>
 
-      {coachOpen && !coachFullScreen && (
+      {coachOpen && !coachFullScreen && !coachMinimized && (
         <div
           className="camp-coach-divider"
           role="separator"
@@ -564,12 +576,16 @@ function App() {
 
       {coachOpen && (
         <div
-          className={`camp-coach-pane embedded-feature ${coachFullScreen ? "full-screen" : "split"}`}
+          className={`camp-coach-pane embedded-feature ${coachFullScreen ? "full-screen" : "split"} ${coachMinimized ? "minimized" : ""}`}
           role="complementary"
           aria-label="AI Coach"
-          style={!coachFullScreen ? { flexBasis: `${100 - coachSplitPercent}%` } : undefined}
+          aria-hidden={coachMinimized}
+          style={!coachFullScreen && !coachMinimized ? { flexBasis: `${100 - coachSplitPercent}%` } : undefined}
         >
           <div className="camp-coach-toolbar">
+            <button className="camp-coach-minimize" onClick={minimizeCoach}>
+              ↘ Hide coach
+            </button>
             <button className="camp-coach-toggle" onClick={toggleCoachFullScreen} aria-pressed={coachFullScreen}>
               {coachFullScreen ? "⤢ Split view" : "⛶ Full screen"}
             </button>
@@ -592,6 +608,12 @@ function App() {
         </div>
       )}
       </div>
+
+      {coachOpen && coachMinimized && (
+        <button className="camp-coach-reopen" onClick={restoreCoach}>
+          💬 AI Coach
+        </button>
+      )}
     </div>
   );
 }

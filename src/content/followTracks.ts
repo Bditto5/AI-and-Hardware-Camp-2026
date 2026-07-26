@@ -3,7 +3,7 @@ export type FollowTrackId = "chatbots" | "face" | "ml";
 export interface FollowTrack {
   id: FollowTrackId;
   label: string;
-  /** Suffix of an existing --camp-* custom property, e.g. "purple" for var(--camp-purple). */
+  /** Suffix of an existing --camp-* custom property, e.g. "green" for var(--camp-green). */
   accent: "purple" | "green" | "yellow";
 }
 
