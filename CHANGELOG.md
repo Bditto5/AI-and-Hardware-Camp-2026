@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.1 — Ollama connection fixes
+
+- REACT Camp now automatically retries connecting to Ollama every 5 seconds instead of checking only once when the app opens. On many classroom laptops Ollama is still finishing its own startup at the moment the app launches, which previously left a permanent "Can't reach Ollama" banner until the app was fully closed and reopened. The "AI setup"/"AI ready" pill in the top bar is also now a button you can click to retry immediately.
+- Fixed the Connection Settings page (and the History page's search/filter controls) still using the app's old light color theme in several places, making the "Ollama address" field, the model download buttons, and the tier cards render with very low contrast (near-invisible text) against their backgrounds. This was likely the underlying cause of "the models can't be clicked to load" reports — the controls worked, but were extremely hard to see or trust.
+- Updated application and backup metadata versions to 2.5.1.
+
 ## 2.5.0 — REACT brand colors
 
 - Recolored the app's primary accent from purple to a forest green matching the REACT organization's actual logo (buttons, navigation, links, focus states, the logo mark, and the home page's hero glow), and shifted secondary muted text from a blue-gray to a neutral gray. Content-variety colors (lesson slide tones, activity category tags, feature card icons) are unchanged, since those exist for visual variety rather than as the app's brand identity.
