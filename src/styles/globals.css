@@ -418,7 +418,7 @@ button { cursor: pointer; }
 .embedded-feature { max-width: 1120px; margin: 0 auto; padding: 24px; }
 .embedded-feature .chat-panel, .embedded-feature .history-panel, .embedded-feature .settings-panel { background: var(--camp-panel); color: var(--camp-text); border-color: var(--camp-border); }
 .embedded-feature .card, .embedded-feature .history-card, .embedded-feature .settings-card { background: var(--camp-card); color: var(--camp-text); border-color: var(--camp-border); }
-.embedded-feature input, .embedded-feature textarea, .embedded-feature select { background: #0e1220; color: white; border-color: var(--camp-border); }
+.embedded-feature input, .embedded-feature textarea, .embedded-feature select { background: #0e1220 !important; color: white !important; border-color: var(--camp-border) !important; }
 .embedded-feature .chat-message-user { background: #15412a; color: white; }.embedded-feature .chat-message-assistant { background: #20273a; color: var(--camp-text); }.embedded-feature .chat-message-error { background: #4a2331; color: #ffd6e2; }
 .embedded-feature .btn-primary { background: var(--camp-brand); }.embedded-feature .btn-secondary, .embedded-feature .btn-ghost { color: var(--camp-text); border-color: var(--camp-border); background: #ffffff08; }
 .embedded-feature p, .embedded-feature .settings-hint { color: var(--camp-muted); }.embedded-feature h1, .embedded-feature h2, .embedded-feature h3 { color: var(--camp-text); }
@@ -779,12 +779,6 @@ body {
   padding: 8px 10px;
   font-size: 0.86rem;
 }
-#chat-tone,
-#chat-length {
-  background: #0e1220;
-  color: white;
-  border-color: var(--camp-border);
-}
 .chat-input-main {
   flex: 1;
 }
@@ -856,12 +850,12 @@ body {
   font-size: 0.9rem;
 }
 .connection-banner-error {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
+  background: #4a2331;
+  color: #ffd6e2;
 }
 .connection-banner-success {
-  background: #e8eff8;
-  color: var(--color-primary-hover);
+  background: #15412a;
+  color: #8de8ac;
 }
 
 /* App toolbar */
@@ -881,7 +875,7 @@ body {
   margin: 0 0 6px;
 }
 .settings-header p {
-  color: var(--color-text-muted);
+  color: var(--camp-muted);
   margin: 0 0 20px;
   font-size: 0.92rem;
 }
@@ -935,17 +929,18 @@ body {
   gap: 10px;
 }
 .model-tier-card {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--camp-border);
   border-radius: 10px;
   padding: 12px;
-  background: var(--color-surface);
+  background: var(--camp-card);
+  color: var(--camp-text);
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 .model-tier-card-active {
-  border-color: var(--color-primary);
-  box-shadow: inset 0 0 0 1px var(--color-primary);
+  border-color: var(--camp-brand);
+  box-shadow: inset 0 0 0 1px var(--camp-brand);
 }
 .model-tier-header {
   display: flex;
@@ -959,16 +954,17 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--camp-text);
 }
 .model-tier-badge {
   font-size: 0.72rem;
   border-radius: 999px;
   padding: 2px 8px;
-  background: #e8eff8;
-  color: var(--color-primary-hover);
+  background: #15412a;
+  color: #8de8ac;
 }
 .model-tier-check {
-  color: var(--color-primary);
+  color: var(--camp-brand);
   font-weight: 700;
 }
 .model-tier-status {
@@ -977,22 +973,23 @@ body {
   padding: 2px 8px;
 }
 .model-tier-status-installed {
-  background: #e8eff8;
-  color: var(--color-primary-hover);
+  background: #15412a;
+  color: #8de8ac;
 }
 .model-tier-status-missing {
-  background: #f4f4f4;
-  color: var(--color-text-muted);
+  background: #1a2033;
+  color: var(--camp-muted);
 }
 .model-tier-model {
   margin: 0;
   font-size: 0.82rem;
-  color: var(--color-text-muted);
+  color: var(--camp-muted);
 }
 .model-tier-blurb {
   margin: 0;
   font-size: 0.86rem;
   line-height: 1.35;
+  color: var(--camp-text);
 }
 .model-tier-progress {
   margin-top: 4px;
@@ -1001,18 +998,18 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 0.78rem;
-  color: var(--color-text-muted);
+  color: var(--camp-muted);
   margin-bottom: 4px;
 }
 .model-tier-progress-bar {
   height: 8px;
   border-radius: 999px;
-  background: var(--color-border);
+  background: var(--camp-border);
   overflow: hidden;
 }
 .model-tier-progress-bar-fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--camp-brand);
   transition: width 0.2s ease;
 }
 .model-tier-progress-bar-fill-indeterminate {
@@ -1285,9 +1282,9 @@ body {
   margin-bottom: 12px;
 }
 .history-chip {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
+  border: 1px solid var(--camp-border);
+  background: var(--camp-card);
+  color: var(--camp-text);
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 0.85rem;
@@ -1297,13 +1294,13 @@ body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 .history-chip-active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--camp-brand);
+  border-color: var(--camp-brand);
   color: white;
 }
 .history-chip-new {
   border-style: dashed;
-  color: var(--color-primary);
+  color: var(--camp-brand);
 }
 .history-inline-edit {
   display: inline-flex;
@@ -1341,13 +1338,13 @@ body {
   cursor: pointer;
 }
 .history-card-open:hover .history-card-title {
-  color: var(--color-primary-hover);
+  color: var(--camp-brand);
 }
 .history-card-type {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-primary);
+  color: var(--camp-brand);
   font-weight: 600;
 }
 .history-card-title {
@@ -1357,12 +1354,12 @@ body {
 .history-card-meta {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--color-text-muted);
+  color: var(--camp-muted);
 }
 .history-card-preview {
   margin: 6px 0 0;
   font-size: 0.86rem;
-  color: var(--color-text-muted);
+  color: var(--camp-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;

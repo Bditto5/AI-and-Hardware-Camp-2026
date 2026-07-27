@@ -114,10 +114,13 @@ function App() {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const isInitialView = useRef(true);
 
-  useEffect(() => {
-    void initHistoryStore().then(() => setHistoryReady(true));
+  const ollamaReadyRef = useRef(false);
+
+  function runOllamaCheck() {
+    setOllamaState((current) => (current === "ready" ? current : "checking"));
     void checkConnection().then((result) => {
       if (result.ok) {
+        ollamaReadyRef.current = true;
         setOllamaState("ready");
         setOllamaMessage("Ollama and the selected model are ready");
       } else {
@@ -125,6 +128,18 @@ function App() {
         setOllamaMessage(result.message);
       }
     });
+  }
+
+  useEffect(() => {
+    void initHistoryStore().then(() => setHistoryReady(true));
+    runOllamaCheck();
+    // Ollama is frequently still starting up (fresh install, just logged in) when the app
+    // first opens — keep retrying in the background instead of leaving a stale error banner
+    // that only a full app restart would clear.
+    const retryTimer = window.setInterval(() => {
+      if (!ollamaReadyRef.current) runOllamaCheck();
+    }, 5_000);
+    return () => window.clearInterval(retryTimer);
   }, []);
 
   useEffect(() => {
@@ -396,9 +411,14 @@ function App() {
           <button className={view === "teacher" ? "active" : ""} aria-current={view === "teacher" ? "page" : undefined} onClick={() => navigate("teacher")}>Teacher</button>
           <button className={view === "settings" ? "active" : ""} onClick={() => navigate("settings")} aria-label="Settings">⚙</button>
         </nav>
-        <div className={`ollama-pill ollama-${ollamaState}`} title={ollamaMessage} role="status" aria-live="polite">
-          <span /> {ollamaState === "ready" ? "AI ready" : ollamaState === "checking" ? "Checking AI" : "AI setup"}
-        </div>
+        <button
+          className={`ollama-pill ollama-${ollamaState}`}
+          onClick={runOllamaCheck}
+          title={ollamaState === "error" ? `${ollamaMessage} Click to check again.` : ollamaMessage}
+          aria-live="polite"
+        >
+          <span /> {ollamaState === "ready" ? "AI ready" : ollamaState === "checking" ? "Checking AI" : "AI setup — retry"}
+        </button>
       </header>
 
       <div id="camp-main-content" ref={mainContentRef} tabIndex={-1} className={coachOpen ? "has-coach" : ""}>
