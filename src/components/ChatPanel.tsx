@@ -177,17 +177,28 @@ function ChatPanelBody({
 
   useEffect(() => {
     let cancelled = false;
-    checkConnection().then((result) => {
-      if (cancelled) return;
-      if (result.ok) {
-        setConnectionState("ok");
-      } else {
-        setConnectionState("error");
-        setConnectionMessage(result.message);
-      }
-    });
+    let ready = false;
+    function runCheck() {
+      checkConnection().then((result) => {
+        if (cancelled) return;
+        if (result.ok) {
+          ready = true;
+          setConnectionState("ok");
+        } else {
+          setConnectionState("error");
+          setConnectionMessage(result.message);
+        }
+      });
+    }
+    runCheck();
+    // Same rationale as App.tsx's top-level check: Ollama may still be starting up when the
+    // coach first opens, so keep retrying instead of leaving a stale error banner.
+    const retryTimer = window.setInterval(() => {
+      if (!cancelled && !ready) runCheck();
+    }, 5_000);
     return () => {
       cancelled = true;
+      window.clearInterval(retryTimer);
     };
   }, []);
 

@@ -346,6 +346,7 @@ button { cursor: pointer; }
 .nav-menu-items button:hover { background: #ffffff0d; }
 .nav-menu-items button small { color: var(--camp-muted); font-size: .72rem; font-weight: 500; }
 .ollama-pill { margin-left: auto; padding: 8px 12px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--camp-border); background: #111522; border-radius: 999px; color: var(--camp-muted); font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.ollama-pill:hover { border-color: var(--camp-brand); }
 .ollama-pill span { width: 8px; height: 8px; border-radius: 50%; background: var(--camp-yellow); }
 .ollama-ready span { background: var(--camp-green); box-shadow: 0 0 10px var(--camp-green); }
 .ollama-error span { background: var(--camp-pink); }
